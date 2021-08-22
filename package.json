@@ -1,0 +1,21 @@
+{
+  "name": "BOSS",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/server.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "boss-js": "github:PretendoNetwork/boss-js",
+    "colors": "^1.4.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-subdomain": "^1.0.5",
+    "fs-extra": "^10.0.0",
+    "morgan": "^1.10.0"
+  }
+}
