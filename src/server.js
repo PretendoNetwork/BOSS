@@ -9,6 +9,7 @@ const { http: { port } } = config;
 const app = express();
 
 const nptsService = require('./services/npts');
+const npplService = require('./services/nppl');
 
 // START APPLICATION
 app.set('etag', false);
@@ -23,6 +24,7 @@ app.use(express.urlencoded({
 }));
 
 app.use(nptsService);
+app.use(npplService);
 
 // 404 handler
 logger.info('Creating 404 status handler');
