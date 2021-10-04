@@ -1,7 +1,5 @@
 # BOSS
 ### Pretendo BOSS server implementation
-<br>
-
 ## About
 
 ### English
