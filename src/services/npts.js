@@ -12,6 +12,7 @@ npts.get('/p01/tasksheet/:id/:hash/:fileName', (request, response) => {
 	const tasksheetPath = path.normalize(`${__dirname}/../../cdn/tasksheet/${id}/${hash}/${fileName}`);
 
 	if (fs.existsSync(tasksheetPath)) {
+		response.set('Content-Type', 'text/xml');
 		response.sendFile(tasksheetPath);
 	} else {
 		response.sendStatus(404);
