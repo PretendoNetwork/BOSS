@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>000500301001420a</TitleId>
+  <TaskId>wood1</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>00004e5f</Filename>
+      <DataId>20063</DataId>
+      <Type>Message</Type>
+      <Url>https://npdi.cdn.nintendo.net/p01/data/1/8UsM86l8xgkjFk8z/20063/04d989ed1b48f88d22167af83f46bab8</Url>
+      <Size>61347</Size>
+      <Notify>
+        <New>app,account</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>

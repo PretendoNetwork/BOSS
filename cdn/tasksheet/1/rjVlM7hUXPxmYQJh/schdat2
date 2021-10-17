@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>0005000010176900</TitleId>
+  <TaskId>schdat2</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>VSSetting.byaml</Filename>
+      <DataId>1485</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.nintendo.net/p01/data/1/rjVlM7hUXPxmYQJh/1485/1b6445f5d3504a5bbf263e8860116334</Url>
+      <Size>26588</Size>
+      <Notify>
+        <New>app</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>

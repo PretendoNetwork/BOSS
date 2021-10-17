@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>0005001010066000</TitleId>
+  <TaskId>promo1</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>35.xml</Filename>
+      <DataId>670</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.nintendo.net/p01/data/1/IXmFUqR2qenXfF61/670/3e0effff27bd0870632faaa9d08abf14</Url>
+      <Size>950364</Size>
+      <Notify>
+        <New></New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>
