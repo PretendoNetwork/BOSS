@@ -19,3 +19,5 @@ const hash = crypto.createHash('md5').update(encryptedContents).digest('hex');
 const encryptedFilePath = path.normalize(path.resolve(encryptedFolderPath, hash));
 
 fs.writeFileSync(encryptedFilePath, encryptedContents);
+
+console.log(`Encrypted ${process.argv[2].split('/').pop()} to ${encryptedFilePath}, (Length ${encryptedContents.length})`);
