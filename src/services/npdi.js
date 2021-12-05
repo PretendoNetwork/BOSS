@@ -26,6 +26,6 @@ npdi.get('/p01/data/1/:titleHash/:fileVersion/:fileHash', (request, response) =>
 const router = express.Router();
 
 // Create subdomain
-router.use(subdomain('npdi.app', npdi));
+router.use(subdomain('npdi.cdn', npdi));
 
 module.exports = router;
