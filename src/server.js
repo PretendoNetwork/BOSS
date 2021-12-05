@@ -10,6 +10,7 @@ const app = express();
 
 const nptsService = require('./services/npts');
 const npplService = require('./services/nppl');
+const npdiService = require('./services/npdi');
 
 // START APPLICATION
 app.set('etag', false);
@@ -25,6 +26,7 @@ app.use(express.urlencoded({
 
 app.use(nptsService);
 app.use(npplService);
+app.use(npdiService);
 
 // 404 handler
 logger.info('Creating 404 status handler');
