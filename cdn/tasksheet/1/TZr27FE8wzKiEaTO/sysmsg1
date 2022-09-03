@@ -4,16 +4,5 @@
   <TaskId>sysmsg1</TaskId>
   <ServiceStatus>open</ServiceStatus>
   <Files>
-    <File>
-      <Filename>000053ea</Filename>
-      <DataId>21482</DataId>
-      <Type>Message</Type>
-      <Url>https://npdi.cdn.nintendo.net/p01/data/1/TZr27FE8wzKiEaTO/21482/4d7cd5b9a1ced69573350843ac32d5fb</Url>
-      <Size>95171</Size>
-      <Notify>
-        <New>app,account</New>
-        <LED>false</LED>
-      </Notify>
-    </File>
   </Files>
 </TaskSheet>

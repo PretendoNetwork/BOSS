@@ -5,10 +5,10 @@
   <ServiceStatus>open</ServiceStatus>
   <Files>
     <File>
-      <Filename>35.xml</Filename>
-      <DataId>670</DataId>
+      <Filename>32.xml</Filename>
+      <DataId>654</DataId>
       <Type>AppData</Type>
-      <Url>https://npdi.cdn.nintendo.net/p01/data/1/IXmFUqR2qenXfF61/670/3e0effff27bd0870632faaa9d08abf14</Url>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/IXmFUqR2qenXfF61/654/93eb9e3ca1ff29d3af0b85fe05843859</Url>
       <Size>950364</Size>
       <Notify>
         <New></New>
