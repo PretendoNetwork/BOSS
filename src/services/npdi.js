@@ -7,7 +7,7 @@ const subdomain = require('express-subdomain');
 const npdi = express.Router();
 
 // Setup routes
-npdi.get('/p01/data/1/:titleHash/:fileVersion/:fileHash', (request, response) => {
+npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 	const { titleHash, fileHash } = request.params;
 	const contentPath = path.normalize(`${__dirname}/../../cdn/content/encrypted/${titleHash}/${fileHash}`);
 
