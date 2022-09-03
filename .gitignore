@@ -58,4 +58,5 @@ typings/
 .env
 
 # custom
+.vscode
 config.json
