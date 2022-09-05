@@ -61,6 +61,22 @@ const TASKSHEETS = [
 		id: 'zvGSM4kOrXpkKnpT',
 		files: ['optdat2', 'schdat2']
 	},
+	{
+		id: 'VFoY6V7u7UUq1EG5',
+		files: ['olvinfo']
+	},
+	{
+		id: '07E3nY6lAwlwrQRo',
+		files: ['wood1', 'woodBGM']
+	},
+	{
+		id: 'RaPn5saabzliYrpo',
+		files: ['news']
+	},
+	{
+		id: 'pO72Hi5uqf5yuNd8',
+		files: ['sp1_ans']
+	}
 ];
 
 for (const tasksheet of TASKSHEETS) {
