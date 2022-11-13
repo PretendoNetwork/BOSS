@@ -8,8 +8,8 @@
       <Filename>Festival.byaml</Filename>
       <DataId>1490</DataId>
       <Type>AppData</Type>
-      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1490/2ff2eebe2d8a9c2d93eb289ef27449cf</Url>
-      <Size>17924</Size>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1490/b5668f0193c7b8af9c126045011f9d39</Url>
+      <Size>17736</Size>
       <Notify>
         <New>app</New>
         <LED>false</LED>
@@ -19,8 +19,8 @@
       <Filename>HapTexture.bfres</Filename>
       <DataId>1491</DataId>
       <Type>AppData</Type>
-      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1491/c05ad953c1111bf2dbbe0a191a401e3e</Url>
-      <Size>364608</Size>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1491/64df775d2a47a96970b7dc97494b4db3</Url>
+      <Size>361536</Size>
       <Notify>
         <New>app</New>
         <LED>false</LED>
@@ -30,8 +30,8 @@
       <Filename>PanelTexture.bfres</Filename>
       <DataId>1492</DataId>
       <Type>AppData</Type>
-      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1492/fa99f04d9bb81cf6205c76c479852916</Url>
-      <Size>479296</Size>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1492/a7fad820c436a74e5bcc3e0cdd0a9c9b</Url>
+      <Size>475712</Size>
       <Notify>
         <New>app</New>
         <LED>false</LED>
