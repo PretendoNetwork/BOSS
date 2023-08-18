@@ -1,10 +1,13 @@
 {
-  "name": "BOSS",
+  "name": "boss",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node ."
+    "lint": "npx eslint .",
+    "build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
+    "clean": "rimraf ./dist",
+    "start": "node --enable-source-maps ."
   },
   "keywords": [],
   "author": "",
@@ -18,8 +21,17 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/fs-extra": "^11.0.1",
+    "@types/morgan": "^1.9.4",
+    "@types/node": "^20.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
     "axios": "^0.27.2",
+    "eslint": "^8.47.0",
     "fs-extra": "^10.1.0",
+    "tsc-alias": "^1.8.7",
+    "typescript": "^5.1.6",
     "xmlbuilder2": "^3.0.2"
   }
 }

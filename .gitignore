@@ -59,4 +59,4 @@ typings/
 
 # custom
 .vscode
-config.json
+dist

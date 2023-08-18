@@ -1,12 +1,10 @@
-const path = require('path');
-const fs = require('fs-extra');
-const express = require('express');
-const subdomain = require('express-subdomain');
+import path from 'node:path';
+import fs from 'fs-extra';
+import express from 'express';
+import subdomain from 'express-subdomain';
 
-// Router to handle the subdomain restriction
 const npdi = express.Router();
 
-// Setup routes
 npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 	const { titleHash, fileHash } = request.params;
 	const contentPath = path.normalize(`${__dirname}/../../cdn/content/encrypted/${titleHash}/${fileHash}`);
@@ -22,10 +20,8 @@ npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 	}
 });
 
-// Main router for endpoints
 const router = express.Router();
 
-// Create subdomain
 router.use(subdomain('npdi.cdn', npdi));
 
-module.exports = router;
+export default router;

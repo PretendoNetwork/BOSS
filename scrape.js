@@ -66,6 +66,14 @@ const TASKSHEETS = [
 		files: ['olvinfo']
 	},
 	{
+		id: 'WJDaV6ePVgrS0TRa',
+		files: ['olvinfo']
+	},
+	{
+		id: '8MNOVprfNVAJjfCM',
+		files: ['olvinfo']
+	},
+	{
 		id: '07E3nY6lAwlwrQRo',
 		files: ['wood1', 'woodBGM']
 	},
