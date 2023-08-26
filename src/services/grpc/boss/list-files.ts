@@ -22,8 +22,8 @@ export async function listFiles(request: ListFilesRequest): Promise<ListFilesRes
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing task ID');
 	}
 
-	if (taskID.length < 7) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Task ID must be 1-7 characters');
+	if (taskID.length < 8) {
+		throw new ServerError(Status.INVALID_ARGUMENT, 'Task ID must be 1-8 characters');
 	}
 
 	if (!bossAppID) {
