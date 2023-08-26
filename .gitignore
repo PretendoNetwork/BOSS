@@ -60,3 +60,4 @@ typings/
 # custom
 .vscode
 dist
+cdn/storage
