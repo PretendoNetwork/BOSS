@@ -41,8 +41,7 @@ export async function updateFileMetadata(request: UpdateFileMetadataRequest, con
 		}
 	}
 
-	// TODO - Find a better way to remove "as mongoose.Types.Array<string>"
-	file.task_id = updateData.taskId;
+	file.task_id = updateData.taskId.slice(0, 7);
 	file.boss_app_id = updateData.bossAppId;
 	file.supported_countries = updateData.supportedCountries;
 	file.supported_languages = updateData.supportedLanguages;

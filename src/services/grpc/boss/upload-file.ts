@@ -33,10 +33,6 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing task ID');
 	}
 
-	if (taskID.length > 8) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Task ID must be 1-8 characters');
-	}
-
 	if (!bossAppID) {
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing BOSS app ID');
 	}

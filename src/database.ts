@@ -44,7 +44,7 @@ export function getTask(bossAppID: string, taskID: string): Promise<HydratedTask
 
 	return Task.findOne<HydratedTaskDocument>({
 		deleted: false,
-		id: taskID,
+		id: taskID.slice(0, 7),
 		boss_app_id: bossAppID
 	});
 }
@@ -53,7 +53,7 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 	verifyConnected();
 
 	const filter: mongoose.FilterQuery<IFile> = {
-		task_id: taskID,
+		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID
 	};
 
@@ -82,7 +82,7 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string): Pr
 	return File.findOne<HydratedFileDocument>({
 		deleted: false,
 		boss_app_id: bossAppID,
-		task_id: taskID,
+		task_id: taskID.slice(0, 7),
 		name: name
 	});
 }

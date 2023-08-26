@@ -8,6 +8,7 @@ export async function listTasks(): Promise<ListTasksResponse> {
 		tasks: tasks.map(task => ({
 			deleted: task.deleted,
 			id: task.id,
+			inGameId: task.in_game_id,
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,

@@ -7,6 +7,7 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 		default: false
 	},
 	id: String,
+	in_game_id: String,
 	boss_app_id: String,
 	creator_pid: Number,
 	status: {

@@ -24,10 +24,6 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing task ID');
 	}
 
-	if (taskID.length > 8) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Task ID must be 1-8 characters');
-	}
-
 	if (!bossAppID) {
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing BOSS app ID');
 	}
@@ -44,8 +40,19 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		throw new ServerError(Status.ALREADY_EXISTS, `Task ${taskID} already exists for BOSS app ${bossAppID}`);
 	}
 
+	// * BOSS tasks have 2 IDs
+	// * - 1: The ID which is registered in-game
+	// * - 2: The ID which is registered on the server
+	// * The in-game task ID can be any length, but the
+	// * ID registered on the server is capped at 7 characters.
+	// * When querying tasks in the API, the server ignores
+	// * all characters after the 7th. For example, Splatoon
+	// * registers task optdata2 in-game, but the server
+	// * tracks it as task optdata
+
 	const task = await Task.create({
-		id: taskID,
+		id: taskID.slice(0, 7),
+		in_game_id: taskID,
 		boss_app_id: bossAppID,
 		creator_pid: user.pid,
 		status: 'open', // TODO - Make this configurable
@@ -59,6 +66,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		task: {
 			deleted: task.deleted,
 			id: task.id,
+			inGameId: task.in_game_id,
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,
