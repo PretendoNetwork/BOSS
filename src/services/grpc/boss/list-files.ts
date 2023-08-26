@@ -1,16 +1,9 @@
 import { Status, ServerError } from 'nice-grpc';
 import { ListFilesRequest, ListFilesResponse } from '@pretendonetwork/grpc/boss/list_files';
+import { isValidCountryCode, isValidLanguage } from '@/util';
 import { getTaskFiles } from '@/database';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
-
-const VALID_COUNTRIES = [
-	'US', 'JP', 'CR'
-];
-
-const VALID_LANGUAGES = [
-	'en', 'ja'
-];
 
 export async function listFiles(request: ListFilesRequest): Promise<ListFilesResponse> {
 	const taskID = request.taskId.trim();
@@ -34,11 +27,11 @@ export async function listFiles(request: ListFilesRequest): Promise<ListFilesRes
 		throw new ServerError(Status.INVALID_ARGUMENT, 'BOSS app ID must only contain letters and numbers');
 	}
 
-	if (country && !VALID_COUNTRIES.includes(country)) {
+	if (country && !isValidCountryCode(country)) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `${country} is not a valid country`);
 	}
 
-	if (language && !VALID_LANGUAGES.includes(language)) {
+	if (language && !isValidLanguage(language)) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `${language} is not a valid language`);
 	}
 
