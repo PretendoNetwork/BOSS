@@ -1,6 +1,6 @@
 import { CallContext, Status, ServerError } from 'nice-grpc';
-import { UploadFileRequest, UploadFileResponse } from '../../../../../grpc-ts/dist/boss/upload_file';
-import { GetUserDataResponse } from '../../../../../grpc-ts/dist/account/get_user_data_rpc';
+import { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5, uploadCDNFile } from '@/util';
 import { getTask, getTaskFile } from '@/database';

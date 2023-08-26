@@ -1,5 +1,5 @@
 import { Status, ServerMiddlewareCall, CallContext, ServerError } from 'nice-grpc';
-import { GetUserDataResponse } from '../../../../../../grpc-ts/dist/account/get_user_data_rpc';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getUserDataByToken } from '@/util';
 
 const TOKEN_REQUIRED_PATHS = [

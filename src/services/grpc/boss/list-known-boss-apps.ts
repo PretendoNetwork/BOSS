@@ -1,4 +1,4 @@
-import { ListKnownBOSSAppsResponse } from '../../../../../grpc-ts/dist/boss/list_known_boss_apps';
+import { ListKnownBOSSAppsResponse } from '@pretendonetwork/grpc/boss/list_known_boss_apps';
 
 export async function listKnownBOSSApps(): Promise<ListKnownBOSSAppsResponse> {
 	return {

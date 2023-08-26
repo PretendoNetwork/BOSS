@@ -1,4 +1,4 @@
-import { BOSSServiceImplementation } from '../../../../../grpc-ts/dist/boss/boss_service';
+import { BOSSServiceImplementation } from '@pretendonetwork/grpc/boss/boss_service';
 import { listKnownBOSSApps } from '@/services/grpc/boss/list-known-boss-apps';
 import { listTasks } from '@/services/grpc/boss/list-tasks';
 import { registerTask } from '@/services/grpc/boss/register-task';

@@ -4,8 +4,8 @@ import { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
-import { AccountClient, AccountDefinition } from '../../grpc-ts/dist/account/account_service';
-import { GetUserDataResponse } from '../../grpc-ts/dist/account/get_user_data_rpc';
+import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { config, disabledFeatures } from '@/config-manager';
 
 let s3: S3;

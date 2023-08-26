@@ -1,4 +1,4 @@
-import { ListTasksResponse } from '../../../../../grpc-ts/dist/boss/list_tasks';
+import { ListTasksResponse } from '@pretendonetwork/grpc/boss/list_tasks';
 import { getAllTasks } from '@/database';
 
 export async function listTasks(): Promise<ListTasksResponse> {

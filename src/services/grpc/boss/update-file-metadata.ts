@@ -1,9 +1,9 @@
 import { CallContext, Status, ServerError } from 'nice-grpc';
-import { UpdateFileMetadataRequest } from '../../../../../grpc-ts/dist/boss/update_file_metadata';
-import { GetUserDataResponse } from '../../../../../grpc-ts/dist/account/get_user_data_rpc';
+import { UpdateFileMetadataRequest } from '@pretendonetwork/grpc/boss/update_file_metadata';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getTaskFileByDataID } from '@/database';
 import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
-import { Empty } from '../../../../../grpc-ts/dist/boss/google/protobuf/empty';
+import { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 import { isValidFileNotifyCondition, isValidFileType } from '@/util';
 
 export async function updateFileMetadata(request: UpdateFileMetadataRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {

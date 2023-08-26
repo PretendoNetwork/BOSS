@@ -1,6 +1,6 @@
 import { CallContext, Status, ServerError } from 'nice-grpc';
-import { RegisterTaskRequest, RegisterTaskResponse } from '../../../../../grpc-ts/dist/boss/register_task';
-import { GetUserDataResponse } from '../../../../../grpc-ts/dist/account/get_user_data_rpc';
+import { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
+import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { getTask } from '@/database';
 import { Task } from '@/models/task';
 import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
