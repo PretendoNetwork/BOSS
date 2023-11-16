@@ -45,6 +45,10 @@ export async function updateFileMetadata(request: UpdateFileMetadataRequest, con
 	file.boss_app_id = updateData.bossAppId;
 	file.supported_countries = updateData.supportedCountries;
 	file.supported_languages = updateData.supportedLanguages;
+	file.password = updateData.password;
+	file.attribute1 = updateData.attribute1;
+	file.attribute2 = updateData.attribute2;
+	file.attribute3 = updateData.attribute3;
 	file.name = updateData.name;
 	file.type = updateData.type;
 	file.notify_on_new = updateData.notifyOnNew;

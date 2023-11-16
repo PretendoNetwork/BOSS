@@ -14,6 +14,7 @@ import authenticationMiddleware from '@/middleware/authentication';
 import nppl from '@/services/nppl';
 import npts from '@/services/npts';
 import npdi from '@/services/npdi';
+import npfl from '@/services/npfl';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(authenticationMiddleware);
 app.use(nppl);
 app.use(npts);
 app.use(npdi);
+app.use(npfl);
 
 LOG_INFO('Creating 404 status handler');
 app.use((_request, response) => {
