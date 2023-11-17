@@ -52,42 +52,42 @@ function get3DSPolicyList(countryCode: string, majorVersion: string): { PolicyLi
 				{
 					TitleId: '0004003000008f02',
 					TaskId: 'basho0',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				},
 				{
 					TitleId: '000400300000bc00',
 					TaskId: 'OlvNotf',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				},
 				{
 					TitleId: '000400300000bd00',
 					TaskId: 'OlvNotf',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				},
 				{
 					TitleId: '000400300000be00',
 					TaskId: 'OlvNotf',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				},
 				{
 					TitleId: '0004003000008f02',
 					TaskId: 'pl',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				},
 				{
 					TitleId: '0004013000003400',
 					TaskId: 'sprelay',
-					Level: 'EXPEDITE',
+					Level: 'HIGH',
 					Persistent: true, // TODO - What's this?
 					Revive: true // TODO - What's this?
 				}
