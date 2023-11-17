@@ -115,15 +115,29 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 	return File.find(filter);
 }
 
-export function getTaskFile(bossAppID: string, taskID: string, name: string): Promise<HydratedFileDocument | null> {
+export function getTaskFile(bossAppID: string, taskID: string, name: string, country?: string, language?: string): Promise<HydratedFileDocument | null> {
 	verifyConnected();
 
-	return File.findOne<HydratedFileDocument>({
+	const filter: mongoose.FilterQuery<IFile> = {
 		deleted: false,
 		boss_app_id: bossAppID,
 		task_id: taskID.slice(0, 7),
 		name: name
-	});
+	};
+
+	if (country) {
+		filter.supported_countries = {
+			$in: [country]
+		};
+	}
+
+	if (language) {
+		filter.supported_languages = {
+			$in: [language]
+		};
+	}
+
+	return File.findOne<HydratedFileDocument>(filter);
 }
 
 export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocument | null> {

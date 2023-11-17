@@ -102,10 +102,6 @@ export async function getUserDataByToken(token: string): Promise<GetUserDataResp
 	}
 }
 
-export async function getCDNFile(): Promise<void> {
-	
-}
-
 export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadStream | null> {
 	try {
 		if (disabledFeatures.s3) {
