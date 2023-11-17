@@ -20,10 +20,10 @@ export default function parseUserAgentMiddleware(request: express.Request, respo
 	}
 
 	if (!result) {
-		//return next(new RequestException('Missing or invalid user agent', 400));
+		return next(new RequestException('Missing or invalid user agent', 400));
 	}
 
-	//request.pid = result.userPID;
+	request.pid = result.userPID;
 
 	return next();
 }

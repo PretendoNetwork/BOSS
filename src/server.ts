@@ -8,7 +8,7 @@ import RequestException from '@/request-exception';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import { config } from '@/config-manager';
 
-import parseUserAgentMiddleware from '@/middleware/parse-user-agent';
+//import parseUserAgentMiddleware from '@/middleware/parse-user-agent';
 import authenticationMiddleware from '@/middleware/authentication';
 
 import nppl from '@/services/nppl';
@@ -26,7 +26,7 @@ app.use(express.urlencoded({
 	extended: true
 }));
 
-app.use(parseUserAgentMiddleware);
+//app.use(parseUserAgentMiddleware);
 app.use(authenticationMiddleware);
 
 app.use(nppl);
