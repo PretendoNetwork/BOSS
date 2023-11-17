@@ -31,7 +31,7 @@ nppl.get([
 
 	// TODO - Make this more dynamic
 	response.set('Content-Type', 'application/xml; charset=utf-8');
-	response.send(xmlbuilder.create(policylist, { standalone: true }).end({ pretty: true }));
+	response.send(xmlbuilder.create(policylist, { headless: true }).end({ pretty: true }));
 });
 
 function get3DSPolicyList(countryCode: string, majorVersion: string): { PolicyList: PolicyList } | null {
