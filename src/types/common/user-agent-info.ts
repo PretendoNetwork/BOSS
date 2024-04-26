@@ -1,5 +1,5 @@
 export type UserAgentInfo = {
 	deviceID?: number;
-	localFriendCodeSeed?: number;
+	localFriendCodeSeed?: bigint;
 	userPID: number;
 };

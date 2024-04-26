@@ -28,6 +28,11 @@ export interface Config {
 			port: number;
 			api_key: string;
 		};
+		friends: {
+			address: string;
+			port: number;
+			api_key: string;
+		};
 	};
 	mongoose: {
 		connection_string: string;

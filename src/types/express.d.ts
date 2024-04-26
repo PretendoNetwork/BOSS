@@ -3,6 +3,7 @@ import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data
 declare global {
 	namespace Express {
 		interface Request {
+			files?: Record<string, any>;
 			pid: number;
 			pnid: GetUserDataResponse | null;
 		}

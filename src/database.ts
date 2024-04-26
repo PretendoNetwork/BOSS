@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import { CECData } from '@/models/cec-data';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
+import { HydratedCECDataDocument, ICECData } from '@/types/mongoose/cec-data';
 import { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
 import { HydratedFileDocument, IFile } from '@/types/mongoose/file';
 
@@ -23,7 +25,7 @@ export function connection(): mongoose.Connection {
 
 export function verifyConnected(): void {
 	if (!connection()) {
-		throw new Error('Cannot make database requets without being connected');
+		throw new Error('Cannot make database requests without being connected');
 	}
 }
 
@@ -147,4 +149,29 @@ export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocumen
 		deleted: false,
 		data_id: dataID
 	});
+}
+
+export function getDuplicateCECData(pid: number, gameID: number): Promise<HydratedCECDataDocument | null> {
+	verifyConnected();
+
+	return CECData.findOne<HydratedCECDataDocument>({
+		creator_pid: pid,
+		game_id: gameID
+	});
+}
+
+export async function getRandomCECData(pids: number[], gameID: number): Promise<HydratedCECDataDocument | null> {
+	verifyConnected();
+
+	const filter: mongoose.FilterQuery<ICECData> = {
+		creator_pid: {
+			$in: pids,
+		},
+		game_id: gameID
+	};
+
+	const count = await CECData.countDocuments(filter);
+	const rand = Math.floor(Math.random() * count);
+
+	return CECData.findOne<HydratedCECDataDocument>(filter).skip(rand);
 }
