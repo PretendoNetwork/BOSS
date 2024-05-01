@@ -1,9 +1,11 @@
+import crypto from 'node:crypto';
 import express from 'express';
 import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
-import { getNEXDataByPID, getFriends } from '@/util';
+import { getFriends } from '@/util';
 import { CECData } from '@/models/cec-data';
+import { CECSlot } from '@/models/cec-slot';
 import { SendMode, SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
@@ -41,11 +43,11 @@ function multipartParser(request: express.Request, response: express.Response, n
 		});
 
 		part.on('data', (data: Buffer | string) => {
-			if (data instanceof String) {
+			if (typeof data === 'string') {
 				data = Buffer.from(data);
 			}
 
-			fileBuffer = Buffer.concat([fileBuffer, data as Buffer]);
+			fileBuffer = Buffer.concat([fileBuffer, data]);
 		});
 
 		part.on('end', () => {
@@ -67,34 +69,30 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		return;
 	}
 
-	if (!request.pid) {
+	if (!request.pid || !request.nexAccount) {
 		response.sendStatus(400);
 		return;
 	}
 
 	// * Check that the account is a 3DS and isn't banned
-	const accountData = await getNEXDataByPID(request.pid);
-	if (!accountData) {
-		response.sendStatus(400);
-		return;
-	}
-
-	if (!accountData.friendCode || accountData.accessLevel < 0) {
+	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
 		response.sendStatus(400);
 		return;
 	}
 
 	const sprMetadataBuffer: Buffer | undefined = request.files['spr-meta'];
-	if (typeof sprMetadataBuffer === 'undefined') {
+
+	if (!sprMetadataBuffer) {
 		response.sendStatus(400);
 		return;
 	}
 
-	let sprSlots: SPRSlot[] = [];
+	const sprSlots: SPRSlot[] = [];
 
 	// * Check spr-meta metadata headers
 	const sprMetadata = sprMetadataBuffer.toString();
 	const metadataHeaders = sprMetadata.split('\r\n'); // * Split header lines
+
 	if (metadataHeaders.length < 1) {
 		response.sendStatus(400);
 		return;
@@ -102,8 +100,8 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 	for (let i = 0; i < metadataHeaders.length; i++) {
 		const metadataHeader = metadataHeaders[i];
-		const field = metadataHeader.split(': '); // * Split header and value
-		if (field.length !== 2) {
+		const [header, value] = metadataHeader.split(': '); // * Split header and value
+		if (!header || !value) {
 			response.sendStatus(400);
 			return;
 		}
@@ -111,7 +109,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		// * Since the headers will always use the same pattern (first the slotsize, then the metadata for each slot),
 		// * we can guarantee that i must match with the slot we are looking at except for 0, which will be the slotsize
 		if (i === 0) {
-			if (field[0] !== 'slotsize') {
+			if (header !== 'slotsize') {
 				response.sendStatus(400);
 				return;
 			}
@@ -119,7 +117,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			// * Validate slotsize
 			let slotsize: number;
 			try {
-				slotsize = parseInt(field[1]);
+				slotsize = parseInt(value);
 			} catch {
 				response.sendStatus(400);
 				return;
@@ -134,7 +132,8 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			continue;
 		}
 
-		const metadata = field[1].split(','); // * Split the value to get the metadata
+		const metadata = value.split(','); // * Split the value to get the metadata
+
 		if (metadata.length !== 3) {
 			response.sendStatus(400);
 			return;
@@ -156,7 +155,8 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		if (size > 0 && sendMode !== SendMode.RecvOnly) {
 			const slot = i.toString().padStart(2, '0');
 			const slotData: Buffer | undefined = request.files['spr-slot' + slot];
-			if (typeof slotData === 'undefined') {
+
+			if (!slotData) {
 				response.sendStatus(400);
 				return;
 			}
@@ -180,7 +180,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 				return;
 			}
 
-			if (slotData.readUInt32LE(0) !== 0x6161) {
+			if (slotData.readUInt32LE() !== 0x6161) {
 				response.sendStatus(400);
 				return;
 			}
@@ -198,7 +198,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			data = slotData;
 		}
 
-		sprSlots = sprSlots.concat({
+		sprSlots.push({
 			sendMode,
 			gameID,
 			size,
@@ -209,49 +209,61 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	const userFriends = await getFriends(request.pid);
 
 	let sprData: Buffer = Buffer.alloc(0);
-	for (let i = 0; i < sprSlots.length; i++) {
-		const sprSlot = sprSlots[i];
-		const slot = String(i + 1).padStart(2, '0');
+	try {
+		for (let i = 0; i < sprSlots.length; i++) {
+			const sprSlot = sprSlots[i];
+			const slot = String(i + 1).padStart(2, '0');
 
-		// * Upload slot data
-		if (sprSlot.size > 0 && sprSlot.sendMode !== SendMode.RecvOnly) {
-			const slotData = await getDuplicateCECData(request.pid, sprSlot.gameID);
-			if (slotData) {
-				slotData.data = sprSlot.data.toString('base64');
-				slotData.size = sprSlot.size;
-				slotData.updated = BigInt(Date.now());
-				await slotData.save();
-			} else {
-				await CECData.create({
-					creator_pid: request.pid,
-					game_id: sprSlot.gameID,
-					data: sprSlot.data.toString('base64'),
-					size: sprSlot.size,
-					created: BigInt(Date.now()),
-					updated: BigInt(Date.now())
-				});
+			// * Upload slot data
+			if (sprSlot.size > 0 && sprSlot.sendMode !== SendMode.RecvOnly) {
+				const dataHash = crypto.createHash('sha256').update(sprSlot.data).digest('base64');
+				let slotData = await getDuplicateCECData(request.pid, sprSlot.gameID);
+
+				if (!slotData || slotData.data_hash !== dataHash) {
+					slotData = await CECData.create({
+						creator_pid: request.pid,
+						game_id: sprSlot.gameID,
+						data: sprSlot.data.toString('base64'),
+						data_hash: dataHash,
+						size: sprSlot.size,
+						created: BigInt(Date.now())
+					});
+				}
+
+				if (slotData.id) {
+					await CECSlot.findOneAndUpdate({
+						creator_pid: request.pid,
+						game_id: slotData.game_id
+					}, {latest_data_id: slotData.id}, {upsert: true});
+				}
 			}
-		}
 
-		if (!userFriends || userFriends.pids.length === 0) {
-			continue; // * Nothing to receive
-		}
+			if (!userFriends || userFriends.pids.length === 0) {
+				continue; // * Nothing to receive
+			}
 
-		// * Receive slot data
-		if (sprSlot.sendMode !== SendMode.SendOnly) {
-			const slotData = await getRandomCECData(userFriends.pids, sprSlot.gameID);
-			if (slotData) {
-				sprData = Buffer.concat([sprData, Buffer.from(slotData.data, 'base64')]);
-				sprSlot.size = slotData.size;
+			// * Receive slot data
+			if (sprSlot.sendMode !== SendMode.SendOnly) {
+				const slotData = await getRandomCECData(userFriends.pids, sprSlot.gameID);
+
+				if (slotData) {
+					sprData = Buffer.concat([sprData, Buffer.from(slotData.data, 'base64')]);
+					sprSlot.size = slotData.size;
+				} else {
+					sprSlot.size = 0;
+				}
 			} else {
 				sprSlot.size = 0;
 			}
-		} else {
-			sprSlot.size = 0;
-		}
 
-		response.setHeader(`X-Spr-Slot${slot}-Result`, `${sprSlot.gameID.toString(16).toUpperCase().padStart(8, '0')},${sprSlot.sendMode},${sprSlot.size}`);
+			response.setHeader(`X-Spr-Slot${slot}-Result`, `${sprSlot.gameID.toString(16).toUpperCase().padStart(8, '0')},${sprSlot.sendMode},${sprSlot.size}`);
+		}
+	} catch (error) {
+		console.log(error);
+		response.sendStatus(400);
+		return;
 	}
+
 
 	response.send(sprData);
 });

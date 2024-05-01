@@ -4,9 +4,9 @@ export interface ICECData {
 	creator_pid: number;
 	game_id: number;
 	data: string;
+	data_hash: string;
 	size: number;
 	created: bigint;
-	updated: bigint;
 }
 
 export interface ICECDataMethods {}

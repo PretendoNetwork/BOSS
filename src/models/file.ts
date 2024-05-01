@@ -32,4 +32,4 @@ FileSchema.plugin(AutoIncrementID, {
 	field: 'data_id'
 });
 
-export const File: FileModel = mongoose.model<IFile, FileModel>('File', FileSchema);
+export const File = mongoose.model<IFile, FileModel>('File', FileSchema);

@@ -3,7 +3,7 @@ export enum SendMode {
 	Exchange,
 	RecvOnly,
 	SendOnly,
-	SendRecv,
+	SendRecv
 }
 
 export type SPRSlot = {

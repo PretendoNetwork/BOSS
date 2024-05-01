@@ -27,6 +27,7 @@ if (!disabledFeatures.s3) {
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.address}:${config.grpc.account.port}`);
 const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
+
 const gRPCFriendsChannel = createChannel(`${config.grpc.friends.address}:${config.grpc.friends.port}`);
 const gRPCFriendsClient: FriendsClient = createClient(FriendsDefinition, gRPCFriendsChannel);
 

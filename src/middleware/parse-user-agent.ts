@@ -1,6 +1,6 @@
 import express from 'express';
 // import RequestException from '@/request-exception';
-import type { UserAgentInfo } from '@/types/common/user-agent-info';
+import { CTRSystemModel, UserAgentInfo } from '@/types/common/user-agent-info';
 
 const FIRMWARE_PATCH_REGION_WIIU_REGEX = /(\d)([JEU])/;
 
@@ -103,7 +103,7 @@ function parse3DS(userAgent: string): UserAgentInfo | null {
 		firmwareMinor !== '17' ||
 		!['0-50J', '0-50U', '0-50E'].includes(firmwarePatchAndRegion) || // TODO - Make this more dynamic?
 		ctrSdkVersion !== '62452' ||
-		!consoleModel || // TODO - Actually check this
+		!Object.values(CTRSystemModel).includes(parseInt(consoleModel)) ||
 		localFriendCodeSeedHex.length !== 16 ||
 		friendCodeHex.length !== 16
 	) {
@@ -113,6 +113,7 @@ function parse3DS(userAgent: string): UserAgentInfo | null {
 	let localFriendCodeSeed: bigint;
 	let friendCode: bigint;
 
+	// TODO - Validate the LFCS, we currently don't store the value on the account server
 	try {
 		localFriendCodeSeed = BigInt('0x' + localFriendCodeSeedHex); // * Parse hex string to bigint
 	} catch {
