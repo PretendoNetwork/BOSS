@@ -36,6 +36,7 @@ npdl.get([
 		return;
 	}
 
+	response.setHeader('Last-Modified', new Date(Number(file.updated)).toUTCString());
 	readStream.pipe(response);
 });
 
