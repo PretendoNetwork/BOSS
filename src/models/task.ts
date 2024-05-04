@@ -20,4 +20,4 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 	updated: BigInt
 }, { id: false });
 
-export const Task: TaskModel = mongoose.model<ITask, TaskModel>('Task', TaskSchema);
+export const Task = mongoose.model<ITask, TaskModel>('Task', TaskSchema);

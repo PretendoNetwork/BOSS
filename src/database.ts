@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
+import { CECData } from '@/models/cec-data';
+import { CECSlot } from '@/models/cec-slot';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
+import { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
+import { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
 import { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
 import { HydratedFileDocument, IFile } from '@/types/mongoose/file';
 
@@ -23,7 +27,7 @@ export function connection(): mongoose.Connection {
 
 export function verifyConnected(): void {
 	if (!connection()) {
-		throw new Error('Cannot make database requets without being connected');
+		throw new Error('Cannot make database requests without being connected');
 	}
 }
 
@@ -147,4 +151,36 @@ export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocumen
 		deleted: false,
 		data_id: dataID
 	});
+}
+
+export function getDuplicateCECData(pid: number, gameID: number): Promise<HydratedCECDataDocument | null> {
+	verifyConnected();
+
+	return CECData.findOne<HydratedCECDataDocument>({
+		creator_pid: pid,
+		game_id: gameID
+	});
+}
+
+export async function getRandomCECData(pids: number[], gameID: number): Promise<HydratedCECDataDocument | null> {
+	verifyConnected();
+
+	// * We search through the CECSlot so that everyone has the same chance of getting their data picked up
+	const filter: mongoose.FilterQuery<ICECSlot> = {
+		creator_pid: {
+			$in: pids,
+		},
+		game_id: gameID
+	};
+
+	const count = await CECSlot.countDocuments(filter);
+	const rand = Math.floor(Math.random() * count);
+
+	const cecSlot = await CECSlot.findOne<HydratedCECSlotDocument>(filter).skip(rand);
+
+	if (cecSlot) {
+		return CECData.findById(cecSlot.latest_data_id);
+	}
+
+	return null;
 }

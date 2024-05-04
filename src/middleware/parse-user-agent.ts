@@ -1,6 +1,6 @@
 import express from 'express';
-import RequestException from '@/request-exception';
-import type { UserAgentInfo } from '@/types/common/user-agent-info';
+// import RequestException from '@/request-exception';
+import { CTRSystemModel, UserAgentInfo } from '@/types/common/user-agent-info';
 
 const FIRMWARE_PATCH_REGION_WIIU_REGEX = /(\d)([JEU])/;
 
@@ -8,7 +8,9 @@ export default function parseUserAgentMiddleware(request: express.Request, respo
 	const userAgent = request.header('user-agent');
 
 	if (!userAgent) {
-		return next(new RequestException('Missing or invalid user agent', 400));
+		// TODO - Error when no user agent is given!
+		// return next(new RequestException('Missing or invalid user agent', 400));
+		return next();
 	}
 
 	let result: UserAgentInfo | null = null;
@@ -20,7 +22,9 @@ export default function parseUserAgentMiddleware(request: express.Request, respo
 	}
 
 	if (!result) {
-		return next(new RequestException('Missing or invalid user agent', 400));
+		// TODO - Error when invalid user agent is given!
+		// return next(new RequestException('Missing or invalid user agent', 400));
+		return next();
 	}
 
 	request.pid = result.userPID;
@@ -85,10 +89,10 @@ function parse3DS(userAgent: string): UserAgentInfo | null {
 		return null;
 	}
 
-	const [bossLibraryInfo, userInfo, firmwareVersion, unknownPart1, unknownPart2] = parts;
+	const [bossLibraryInfo, userInfo, firmwareVersion, ctrSdkVersion, consoleModel] = parts;
 	const [bossLibraryName, bossLibraryVersion] = bossLibraryInfo.split('-');
 	const [bossLibraryVersionMajor, bossLibraryVersionMinor] = bossLibraryVersion.split('.');
-	const [unknownUserInfo1Hex, unknownUserInfo2Hex] = userInfo.split('-');
+	const [localFriendCodeSeedHex, friendCodeHex] = userInfo.split('-');
 	const [firmwareMajor, firmwareMinor, firmwarePatchAndRegion] = firmwareVersion.split('.');
 
 	if (
@@ -98,35 +102,32 @@ function parse3DS(userAgent: string): UserAgentInfo | null {
 		firmwareMajor !== '11' ||
 		firmwareMinor !== '17' ||
 		!['0-50J', '0-50U', '0-50E'].includes(firmwarePatchAndRegion) || // TODO - Make this more dynamic?
-		unknownPart1 !== '62452' || // TODO - Is this right?
-		!unknownPart2 || // TODO - Actually check this
-		unknownUserInfo1Hex.length !== 16 ||
-		unknownUserInfo2Hex.length !== 16
+		ctrSdkVersion !== '62452' ||
+		!Object.values(CTRSystemModel).includes(parseInt(consoleModel)) ||
+		localFriendCodeSeedHex.length !== 16 ||
+		friendCodeHex.length !== 16
 	) {
 		return null;
 	}
 
-	let unknownUserInfo1: number;
-	let unknownUserInfo2: number;
+	let localFriendCodeSeed: bigint;
+	let friendCode: bigint;
 
-	// TODO - Parse this data? What is this?
+	// TODO - Validate the LFCS, we currently don't store the value on the account server
 	try {
-		unknownUserInfo1 = parseInt(unknownUserInfo1Hex, 16);
+		localFriendCodeSeed = BigInt('0x' + localFriendCodeSeedHex); // * Parse hex string to bigint
 	} catch {
 		return null;
 	}
 
+	// TODO - Validate the friend code
 	try {
-		unknownUserInfo2 = parseInt(unknownUserInfo2Hex, 16);
+		friendCode = BigInt('0x' + friendCodeHex); // * Parse hex string to bigint
 	} catch {
 		return null;
 	}
 
-	// TODO - What is the upper 4 bytes?
-	const localFriendCodeSeed = (unknownUserInfo1 & 0xFFFFFFFF); // * LFCS is the lower 4 bytes
-
-	// TODO - What is the upper 4 bytes?
-	const userPID = (unknownUserInfo2 & 0xFFFFFFFF); // * PID is the lower 4 bytes
+	const userPID = Number(friendCode & 0xFFFFFFFFn); // * PID is the lower 4 bytes
 
 	return {
 		localFriendCodeSeed,

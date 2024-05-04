@@ -15,11 +15,12 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.395.0",
     "@pretendonetwork/boss-crypto": "^1.0.0",
-    "@pretendonetwork/grpc": "^1.0.4",
+    "@pretendonetwork/grpc": "^1.0.6",
     "@typegoose/auto-increment": "^3.6.1",
     "boss-js": "github:PretendoNetwork/boss-js",
     "cacache": "^18.0.0",
     "colors": "^1.4.0",
+    "dicer": "^0.3.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-subdomain": "^1.0.5",
@@ -30,6 +31,7 @@
     "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
+    "@types/dicer": "^0.2.4",
     "@types/express": "^4.17.17",
     "@types/fs-extra": "^11.0.1",
     "@types/morgan": "^1.9.4",

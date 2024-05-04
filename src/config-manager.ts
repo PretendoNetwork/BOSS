@@ -57,6 +57,11 @@ export const config: Config = {
 			address: process.env.PN_BOSS_CONFIG_GRPC_ACCOUNT_SERVER_ADDRESS?.trim() || '',
 			port: Number(process.env.PN_BOSS_CONFIG_GRPC_ACCOUNT_SERVER_PORT?.trim() || ''),
 			api_key: process.env.PN_BOSS_CONFIG_GRPC_ACCOUNT_SERVER_API_KEY?.trim() || ''
+		},
+		friends: {
+			address: process.env.PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_ADDRESS?.trim() || '',
+			port: Number(process.env.PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_PORT?.trim() || ''),
+			api_key: process.env.PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_API_KEY?.trim() || ''
 		}
 	},
 	mongoose: {
@@ -116,6 +121,18 @@ if (!config.grpc.account.port) {
 
 if (!config.grpc.account.api_key) {
 	errors.push('Failed to find account server gRPC API key. Set the PN_BOSS_CONFIG_GRPC_ACCOUNT_SERVER_API_KEY environment variable');
+}
+
+if (!config.grpc.friends.address) {
+	errors.push('Failed to find account server gRPC address. Set the PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_ADDRESS environment variable');
+}
+
+if (!config.grpc.friends.port) {
+	errors.push('Failed to find account server gRPC port. Set the PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_PORT environment variable');
+}
+
+if (!config.grpc.friends.api_key) {
+	errors.push('Failed to find account server gRPC API key. Set the PN_BOSS_CONFIG_GRPC_FRIENDS_SERVER_API_KEY environment variable');
 }
 
 if (!config.mongoose.connection_string) {

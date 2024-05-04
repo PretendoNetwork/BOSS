@@ -5,7 +5,10 @@ import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { FriendsClient, FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
+import { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
 import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
 import { config, disabledFeatures } from '@/config-manager';
 
 let s3: S3;
@@ -24,6 +27,9 @@ if (!disabledFeatures.s3) {
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.address}:${config.grpc.account.port}`);
 const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
+
+const gRPCFriendsChannel = createChannel(`${config.grpc.friends.address}:${config.grpc.friends.port}`);
+const gRPCFriendsClient: FriendsClient = createClient(FriendsDefinition, gRPCFriendsChannel);
 
 const VALID_COUNTRIES = [
 	'GB', 'US', 'IT', 'NL', 'DE', 'CA', 'FR', 'HU', 'CR',
@@ -86,6 +92,21 @@ export async function getUserDataByPID(pid: number): Promise<GetUserDataResponse
 	}
 }
 
+export async function getNEXDataByPID(pid: number): Promise<GetNEXDataResponse | null> {
+	try {
+		return await gRPCAccountClient.getNEXData({
+			pid: pid
+		}, {
+			metadata: Metadata({
+				'X-API-Key': config.grpc.account.api_key
+			})
+		});
+	} catch {
+		// TODO - Handle error
+		return null;
+	}
+}
+
 export async function getUserDataByToken(token: string): Promise<GetUserDataResponse | null> {
 	try {
 		return await gRPCAccountClient.exchangeTokenForUserData({
@@ -98,6 +119,21 @@ export async function getUserDataByToken(token: string): Promise<GetUserDataResp
 	} catch (error) {
 		// TODO - Handle error
 		console.log(error);
+		return null;
+	}
+}
+
+export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse | null> {
+	try {
+		return await gRPCFriendsClient.getUserFriendPIDs({
+			pid: pid
+		}, {
+			metadata: Metadata({
+				'X-API-Key': config.grpc.friends.api_key
+			})
+		});
+	} catch {
+		// TODO - Handle error
 		return null;
 	}
 }
