@@ -88,15 +88,15 @@ if (!config.http.port) {
 }
 
 if (md5(config.crypto.wup.aes_key) !== BOSS_WIIU_AES_KEY_MD5_HASH) {
-	errors.push('Invalid BOSS WiiU AES key. Set or correct the PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY environment variable');
+	warnings.push('Invalid BOSS WiiU AES key. Uploading and encrypting new BOSS content for the Wii U won\'t work! Set or correct the PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY environment variable');
 }
 
 if (md5(config.crypto.wup.hmac_key) !== BOSS_WIIU_HMAC_KEY_MD5_HASH) {
-	errors.push('Invalid BOSS WiiU HMAC key. Set or correct the PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY environment variable');
+	warnings.push('Invalid BOSS WiiU HMAC key. Uploading and encrypting new BOSS content for the Wii U won\'t work! Set or correct the PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY environment variable');
 }
 
 if (md5(config.crypto.ctr.aes_key) !== BOSS_3DS_AES_KEY_MD5_HASH) {
-	errors.push('Invalid BOSS 3DS AES key. Set or correct the PN_BOSS_CONFIG_BOSS_3DS_AES_KEY environment variable');
+	warnings.push('Invalid BOSS 3DS AES key. Uploading and encrypting new BOSS content for the 3DS won\'t work! Set or correct the PN_BOSS_CONFIG_BOSS_3DS_AES_KEY environment variable');
 }
 
 if (!config.grpc.boss.address) {
