@@ -24,6 +24,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-subdomain": "^1.0.5",
+    "fs-extra": "^11.2.0",
     "moment": "^2.29.4",
     "mongoose": "^7.4.3",
     "morgan": "^1.10.0",
@@ -40,7 +41,6 @@
     "@typescript-eslint/parser": "^6.4.0",
     "axios": "^1.6.2",
     "eslint": "^8.47.0",
-    "fs-extra": "^10.1.0",
     "tsc-alias": "^1.8.7",
     "typescript": "^5.1.6",
     "xmlbuilder2": "^3.0.2"
