@@ -2,6 +2,7 @@ import express from 'express';
 import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
 import { getCDNFileStream } from '@/util';
+import { Stream } from 'node:stream';
 
 const npdl = express.Router();
 
@@ -37,7 +38,13 @@ npdl.get([
 	}
 
 	response.setHeader('Last-Modified', new Date(Number(file.updated)).toUTCString());
-	readStream.pipe(response);
+
+	Stream.pipeline(readStream, response, (err) => {
+		if (err) {
+			console.error('Error with response stream: ', err.message);
+			response.end();
+		}
+	});
 });
 
 const router = express.Router();
