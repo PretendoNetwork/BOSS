@@ -11,6 +11,7 @@ import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data
 import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
 import { config, disabledFeatures } from '@/config-manager';
 import { NodeJsClient } from '@smithy/types';
+import { Response } from 'express';
 
 let s3: NodeJsClient<S3Client>;
 
@@ -57,6 +58,18 @@ const VALID_FILE_TYPES = [
 const VALID_FILE_NOTIFY_CONDITIONS = [
 	'app', 'account'
 ];
+
+export function fileErrCallback(response: Response) {
+	return (err: NodeJS.ErrnoException): void => {
+		if (err) {
+			if (err.code === 'ENOENT') {
+				response.sendStatus(404);
+			} else {
+				response.status(500).send('Server Error');
+			}
+		}
+	};
+}
 
 export function md5(input: crypto.BinaryLike): string {
 	return crypto.createHash('md5').update(input).digest('hex');
