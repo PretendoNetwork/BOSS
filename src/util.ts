@@ -65,7 +65,10 @@ export function fileErrCallback(response: Response) {
 			if (err.code === 'ENOENT') {
 				response.sendStatus(404);
 			} else {
-				response.status(500).send('Server Error');
+				if (!response.headersSent) {
+					response.status(500).send('Server Error');
+				}
+				console.error('Error in sending file: ', err);
 			}
 		}
 	};
