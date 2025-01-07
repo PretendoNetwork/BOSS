@@ -27,7 +27,7 @@ export function LOG_ERROR(input: string): void {
 	input = `[${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}] [ERROR]: ${input}`;
 	streams.error.write(`${input}\n`);
 
-	console.log(`${input}`.red.bold);
+	console.error(`${input}`.red.bold);
 }
 
 export function LOG_WARN(input: string): void {
