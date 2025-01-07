@@ -3,6 +3,7 @@ import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
 import { getCDNFileStream } from '@/util';
 import { Stream } from 'node:stream';
+import { LOG_ERROR } from '@/logger';
 
 const npdl = express.Router();
 
@@ -41,7 +42,7 @@ npdl.get([
 
 	Stream.pipeline(readStream, response, (err) => {
 		if (err) {
-			console.error('Error with response stream: ', err.message);
+			LOG_ERROR('Error with response stream: ' + err.message);
 			response.end();
 		}
 	});

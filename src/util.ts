@@ -12,6 +12,7 @@ import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_use
 import { config, disabledFeatures } from '@/config-manager';
 import { NodeJsClient } from '@smithy/types';
 import { Response } from 'express';
+import { LOG_ERROR } from '@/logger';
 
 let s3: NodeJsClient<S3Client>;
 
@@ -68,7 +69,7 @@ export function fileErrCallback(response: Response) {
 				if (!response.headersSent) {
 					response.status(500).send('Server Error');
 				}
-				console.error('Error in sending file: ', err);
+				LOG_ERROR('Error in sending file: ' + err.message);
 			}
 		}
 	};
