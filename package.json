@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix",
     "build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
     "clean": "rimraf ./dist",
     "start": "node --enable-source-maps ."
@@ -46,3 +47,4 @@
     "typescript": "^5.1.6",
     "xmlbuilder2": "^3.0.2"
   }
+}

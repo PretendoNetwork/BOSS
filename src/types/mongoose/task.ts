@@ -17,6 +17,6 @@ export interface ITaskMethods {}
 
 interface ITaskQueryHelpers {}
 
-export interface TaskModel extends Model<ITask, ITaskQueryHelpers, ITaskMethods> {}
+export type TaskModel = Model<ITask, ITaskQueryHelpers, ITaskMethods>
 
 export type HydratedTaskDocument = HydratedDocument<ITask, ITaskMethods>

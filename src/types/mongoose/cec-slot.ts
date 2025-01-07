@@ -10,6 +10,6 @@ export interface ICECSlotMethods {}
 
 interface ICECSlotQueryHelpers {}
 
-export interface CECSlotModel extends Model<ICECSlot, ICECSlotQueryHelpers, ICECSlotMethods> {}
+export type CECSlotModel = Model<ICECSlot, ICECSlotQueryHelpers, ICECSlotMethods>
 
 export type HydratedCECSlotDocument = HydratedDocument<ICECSlot, ICECSlotMethods>
