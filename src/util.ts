@@ -3,15 +3,16 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
-import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3, S3Client } from '@aws-sdk/client-s3';
 import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
 import { FriendsClient, FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
 import { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
 import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
 import { config, disabledFeatures } from '@/config-manager';
+import { NodeJsClient } from '@smithy/types';
 
-let s3: S3;
+let s3: NodeJsClient<S3Client>;
 
 if (!disabledFeatures.s3) {
 	s3 = new S3({
@@ -138,7 +139,7 @@ export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse
 	}
 }
 
-export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadStream | null> {
+export async function getCDNFileStream(key: string): Promise<Readable | null> {
 	try {
 		if (disabledFeatures.s3) {
 			return await getLocalCDNFile(key);
@@ -152,7 +153,7 @@ export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadS
 				return null;
 			}
 
-			return response.Body as Readable;
+			return response.Body;
 		}
 	} catch (error) {
 		return null;
