@@ -11,7 +11,7 @@ npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 
 	response.sendFile(contentPath, {
 		headers: {
-			'Content-Type': 'applicatoin/octet-stream',
+			'Content-Type': 'application/octet-stream',
 			'Content-Disposition': 'attachment',
 			'Content-Transfer-Encoding': 'binary',
 		}
