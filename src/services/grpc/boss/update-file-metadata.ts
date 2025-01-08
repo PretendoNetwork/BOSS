@@ -1,10 +1,11 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { UpdateFileMetadataRequest } from '@pretendonetwork/grpc/boss/update_file_metadata';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { getTaskFileByDataID } from '@/database';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
-import { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 import { isValidFileNotifyCondition, isValidFileType } from '@/util';
+import type { CallContext } from 'nice-grpc';
+import type { UpdateFileMetadataRequest } from '@pretendonetwork/grpc/boss/update_file_metadata';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 
 export async function updateFileMetadata(request: UpdateFileMetadataRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
 	// * This is asserted in authentication middleware, we know this is never null

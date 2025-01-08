@@ -1,9 +1,10 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { ServerError, Status } from 'nice-grpc';
 import { getTask } from '@/database';
 import { Task } from '@/models/task';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { CallContext } from 'nice-grpc';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 

@@ -1,4 +1,4 @@
-import { Model, HydratedDocument } from 'mongoose';
+import type { Model, HydratedDocument } from 'mongoose';
 
 export interface IFile {
 	deleted: boolean;
@@ -26,6 +26,6 @@ export interface IFileMethods {}
 
 interface IFileQueryHelpers {}
 
-export interface FileModel extends Model<IFile, IFileQueryHelpers, IFileMethods> {}
+export type FileModel = Model<IFile, IFileQueryHelpers, IFileMethods>;
 
-export type HydratedFileDocument = HydratedDocument<IFile, IFileMethods>
+export type HydratedFileDocument = HydratedDocument<IFile, IFileMethods>;

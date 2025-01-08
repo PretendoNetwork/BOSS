@@ -14,33 +14,41 @@ const streams = {
 	info: fs.createWriteStream(`${root}/logs/info.log`)
 } as const;
 
+function getCurrentTimestamp(): string {
+	const date = new Date();
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0'); // * Months are 0-indexed
+	const day = String(date.getDate()).padStart(2, '0');
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+	const seconds = String(date.getSeconds()).padStart(2, '0');
+
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export function LOG_SUCCESS(input: string): void {
-	const time = new Date();
-	input = `[${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}] [SUCCESS]: ${input}`;
+	input = `[${getCurrentTimestamp()}] [SUCCESS]: ${input}`;
 	streams.success.write(`${input}\n`);
 
 	console.log(`${input}`.green.bold);
 }
 
 export function LOG_ERROR(input: string): void {
-	const time = new Date();
-	input = `[${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}] [ERROR]: ${input}`;
+	input = `[${getCurrentTimestamp()}] [ERROR]: ${input}`;
 	streams.error.write(`${input}\n`);
 
-	console.log(`${input}`.red.bold);
+	console.error(`${input}`.red.bold);
 }
 
 export function LOG_WARN(input: string): void {
-	const time = new Date();
-	input = `[${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}] [WARN]: ${input}`;
+	input = `[${getCurrentTimestamp()}] [WARN]: ${input}`;
 	streams.warn.write(`${input}\n`);
 
 	console.log(`${input}`.yellow.bold);
 }
 
 export function LOG_INFO(input: string): void {
-	const time = new Date();
-	input = `[${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}] [INFO]: ${input}`;
+	input = `[${getCurrentTimestamp()}] [INFO]: ${input}`;
 	streams.info.write(`${input}\n`);
 
 	console.log(`${input}`.cyan.bold);

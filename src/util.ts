@@ -1,17 +1,23 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
-import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
-import { FriendsClient, FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
-import { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
+import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
 import { config, disabledFeatures } from '@/config-manager';
+import { LOG_ERROR } from '@/logger';
+import type { FriendsClient } from '@pretendonetwork/grpc/friends/friends_service';
+import type { AccountClient } from '@pretendonetwork/grpc/account/account_service';
+import type { S3Client } from '@aws-sdk/client-s3';
+import type { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
+import type { NodeJsClient } from '@smithy/types';
+import type { Response } from 'express';
+import type { Readable } from 'node:stream';
 
-let s3: S3;
+let s3: NodeJsClient<S3Client>;
 
 if (!disabledFeatures.s3) {
 	s3 = new S3({
@@ -56,6 +62,21 @@ const VALID_FILE_TYPES = [
 const VALID_FILE_NOTIFY_CONDITIONS = [
 	'app', 'account'
 ];
+
+export function fileErrCallback(response: Response) {
+	return (err: NodeJS.ErrnoException): void => {
+		if (err) {
+			if (err.code === 'ENOENT') {
+				response.sendStatus(404);
+			} else {
+				if (!response.headersSent) {
+					response.status(500).send('Server Error');
+				}
+				LOG_ERROR('Error in sending file: ' + err.message);
+			}
+		}
+	};
+}
 
 export function md5(input: crypto.BinaryLike): string {
 	return crypto.createHash('md5').update(input).digest('hex');
@@ -138,7 +159,7 @@ export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse
 	}
 }
 
-export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadStream | null> {
+export async function getCDNFileStream(key: string): Promise<Readable | null> {
 	try {
 		if (disabledFeatures.s3) {
 			return await getLocalCDNFile(key);
@@ -152,9 +173,9 @@ export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadS
 				return null;
 			}
 
-			return response.Body as Readable;
+			return response.Body;
 		}
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }

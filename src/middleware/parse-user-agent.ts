@@ -1,6 +1,7 @@
-import express from 'express';
+import { CTRSystemModel } from '@/types/common/user-agent-info';
+import type { UserAgentInfo } from '@/types/common/user-agent-info';
+import type express from 'express';
 // import RequestException from '@/request-exception';
-import { CTRSystemModel, UserAgentInfo } from '@/types/common/user-agent-info';
 
 const FIRMWARE_PATCH_REGION_WIIU_REGEX = /(\d)([JEU])/;
 

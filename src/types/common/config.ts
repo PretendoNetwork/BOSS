@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
+import type mongoose from 'mongoose';
 
 export interface DisabledFeatures {
-	s3: boolean
+	s3: boolean;
 }
 
 export interface Config {

@@ -1,8 +1,3 @@
-process.title = 'Pretendo - BOSS';
-process.on('SIGTERM', () => {
-	process.exit(0);
-});
-
 import express from 'express';
 import morgan from 'morgan';
 import { connect as connectDatabase } from '@/database';
@@ -10,16 +5,19 @@ import { startGRPCServer } from '@/services/grpc/server';
 import RequestException from '@/request-exception';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import { config } from '@/config-manager';
-
 import parseUserAgentMiddleware from '@/middleware/parse-user-agent';
 import authenticationMiddleware from '@/middleware/authentication';
-
 import nppl from '@/services/nppl';
 import npts from '@/services/npts';
 import npdi from '@/services/npdi';
 import npfl from '@/services/npfl';
 import npdl from '@/services/npdl';
 import spr from '@/services/spr';
+
+process.title = 'Pretendo - BOSS';
+process.on('SIGTERM', () => {
+	process.exit(0);
+});
 
 const app = express();
 

@@ -4,10 +4,10 @@ import { CECSlot } from '@/models/cec-slot';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
-import { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
-import { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
-import { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
-import { HydratedFileDocument, IFile } from '@/types/mongoose/file';
+import type { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
+import type { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
+import type { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
+import type { HydratedFileDocument, IFile } from '@/types/mongoose/file';
 
 const connection_string: string = config.mongoose.connection_string;
 const options: mongoose.ConnectOptions = config.mongoose.options;
@@ -168,7 +168,7 @@ export async function getRandomCECData(pids: number[], gameID: number): Promise<
 	// * We search through the CECSlot so that everyone has the same chance of getting their data picked up
 	const filter: mongoose.FilterQuery<ICECSlot> = {
 		creator_pid: {
-			$in: pids,
+			$in: pids
 		},
 		game_id: gameID
 	};

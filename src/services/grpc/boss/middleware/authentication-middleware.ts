@@ -1,13 +1,14 @@
-import { Status, ServerMiddlewareCall, CallContext, ServerError } from 'nice-grpc';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { getUserDataByToken } from '@/util';
+import type { ServerMiddlewareCall, CallContext } from 'nice-grpc';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 
 const TOKEN_REQUIRED_PATHS = [
 	'/boss.BOSS/RegisterTask',
 	'/boss.BOSS/UpdateTask',
 	'/boss.BOSS/DeleteTask',
 	'/boss.BOSS/UploadFile',
-	'/boss.BOSS/DeleteFile',
+	'/boss.BOSS/DeleteFile'
 ];
 
 export type AuthenticationCallContextExt = {
@@ -16,7 +17,7 @@ export type AuthenticationCallContextExt = {
 
 export async function* authenticationMiddleware<Request, Response>(
 	call: ServerMiddlewareCall<Request, Response, AuthenticationCallContextExt>,
-	context: CallContext,
+	context: CallContext
 ): AsyncGenerator<Response, Response | void, undefined> {
 	const token: string | undefined = context.metadata.get('X-Token')?.trim();
 

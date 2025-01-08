@@ -2,7 +2,7 @@ import xmlbuilder from 'xmlbuilder';
 import moment from 'moment';
 import express from 'express';
 import subdomain from 'express-subdomain';
-import { PolicyList } from '@/types/common/policylist';
+import type { PolicyList } from '@/types/common/policylist';
 
 const nppl = express.Router();
 

@@ -1,7 +1,9 @@
+import { Stream } from 'node:stream';
 import express from 'express';
 import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
 import { getCDNFileStream } from '@/util';
+import { LOG_ERROR } from '@/logger';
 
 const npdl = express.Router();
 
@@ -16,9 +18,9 @@ npdl.get([
 	languageCode?: string;
 	fileName: string;
 }, any, any, {
-	ap?: string;
-	tm?: string;
-}>, response) => {
+		ap?: string;
+		tm?: string;
+	}>, response) => {
 	const { appID, taskID, countryCode, languageCode, fileName } = request.params;
 
 	const file = await getTaskFile(appID, taskID, fileName, countryCode, languageCode);
@@ -37,7 +39,13 @@ npdl.get([
 	}
 
 	response.setHeader('Last-Modified', new Date(Number(file.updated)).toUTCString());
-	readStream.pipe(response);
+
+	Stream.pipeline(readStream, response, (err) => {
+		if (err) {
+			LOG_ERROR('Error with response stream: ' + err.message);
+			response.end();
+		}
+	});
 });
 
 const router = express.Router();
