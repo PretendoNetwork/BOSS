@@ -69,13 +69,19 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		return;
 	}
 
-	if (!request.pid || !request.nexAccount) {
+	if (!request.pid) {
+		response.sendStatus(400);
+		return;
+	}
+
+	const nexAccount = await getNEXDataByPID(request.pid);
+	if (!nexAccount) {
 		response.sendStatus(400);
 		return;
 	}
 
 	// * Check that the account is a 3DS and isn't banned
-	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
+	if (!nexAccount.friendCode || nexAccount.accessLevel < 0) {
 		response.sendStatus(400);
 		return;
 	}
