@@ -1,18 +1,21 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
-import { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
-import { GetObjectCommand, PutObjectCommand, S3, S3Client } from '@aws-sdk/client-s3';
-import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
-import { FriendsClient, FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
-import { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
+import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
 import { config, disabledFeatures } from '@/config-manager';
-import { NodeJsClient } from '@smithy/types';
-import { Response } from 'express';
 import { LOG_ERROR } from '@/logger';
+import type { FriendsClient } from '@pretendonetwork/grpc/friends/friends_service';
+import type { AccountClient } from '@pretendonetwork/grpc/account/account_service';
+import type { S3Client } from '@aws-sdk/client-s3';
+import type { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
+import type { NodeJsClient } from '@smithy/types';
+import type { Response } from 'express';
+import type { Readable } from 'node:stream';
 
 let s3: NodeJsClient<S3Client>;
 
@@ -172,7 +175,7 @@ export async function getCDNFileStream(key: string): Promise<Readable | null> {
 
 			return response.Body;
 		}
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }

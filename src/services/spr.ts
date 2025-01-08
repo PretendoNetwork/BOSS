@@ -6,7 +6,8 @@ import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends, getNEXDataByPID } from '@/util';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
-import { SendMode, SPRSlot } from '@/types/common/spr-slot';
+import { SendMode } from '@/types/common/spr-slot';
+import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
@@ -33,7 +34,7 @@ function multipartParser(request: express.Request, response: express.Response, n
 		let fileBuffer = Buffer.alloc(0);
 		let fileName = '';
 
-		part.on('header', header => {
+		part.on('header', (header) => {
 			const contentDisposition = header['content-disposition' as keyof object];
 			const regexResult = RE_FILE_NAME.exec(contentDisposition);
 
@@ -208,7 +209,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			sendMode,
 			gameID,
 			size,
-			data,
+			data
 		});
 	}
 
@@ -240,7 +241,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 					await CECSlot.findOneAndUpdate({
 						creator_pid: request.pid,
 						game_id: slotData.game_id
-					}, {latest_data_id: slotData.id}, {upsert: true});
+					}, { latest_data_id: slotData.id }, { upsert: true });
 				}
 			}
 
@@ -269,7 +270,6 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		response.sendStatus(400);
 		return;
 	}
-
 
 	response.send(sprData);
 });

@@ -1,8 +1,8 @@
+import { Stream } from 'node:stream';
 import express from 'express';
 import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
 import { getCDNFileStream } from '@/util';
-import { Stream } from 'node:stream';
 import { LOG_ERROR } from '@/logger';
 
 const npdl = express.Router();
@@ -18,9 +18,9 @@ npdl.get([
 	languageCode?: string;
 	fileName: string;
 }, any, any, {
-	ap?: string;
-	tm?: string;
-}>, response) => {
+		ap?: string;
+		tm?: string;
+	}>, response) => {
 	const { appID, taskID, countryCode, languageCode, fileName } = request.params;
 
 	const file = await getTaskFile(appID, taskID, fileName, countryCode, languageCode);

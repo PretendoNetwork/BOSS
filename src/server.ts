@@ -1,8 +1,3 @@
-process.title = 'Pretendo - BOSS';
-process.on('SIGTERM', () => {
-	process.exit(0);
-});
-
 import express from 'express';
 import morgan from 'morgan';
 import { connect as connectDatabase } from '@/database';
@@ -17,6 +12,11 @@ import npdi from '@/services/npdi';
 import npfl from '@/services/npfl';
 import npdl from '@/services/npdl';
 import spr from '@/services/spr';
+
+process.title = 'Pretendo - BOSS';
+process.on('SIGTERM', () => {
+	process.exit(0);
+});
 
 const app = express();
 

@@ -14,7 +14,7 @@ npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 			// * The misspelling here is intentional, it's what the official server sets
 			'Content-Type': 'applicatoin/octet-stream',
 			'Content-Disposition': 'attachment',
-			'Content-Transfer-Encoding': 'binary',
+			'Content-Transfer-Encoding': 'binary'
 		}
 	}, fileErrCallback(response));
 });
