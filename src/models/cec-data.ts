@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ICECData, ICECDataMethods, CECDataModel } from '@/types/mongoose/cec-data';
+import type { ICECData, ICECDataMethods, CECDataModel } from '@/types/mongoose/cec-data';
 
 const CECDataSchema = new mongoose.Schema<ICECData, CECDataModel, ICECDataMethods>({
 	creator_pid: Number,

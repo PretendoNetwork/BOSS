@@ -1,5 +1,5 @@
-import { ListTasksResponse } from '@pretendonetwork/grpc/boss/list_tasks';
 import { getAllTasks } from '@/database';
+import type { ListTasksResponse } from '@pretendonetwork/grpc/boss/list_tasks';
 
 export async function listTasks(): Promise<ListTasksResponse> {
 	const tasks = await getAllTasks(false);

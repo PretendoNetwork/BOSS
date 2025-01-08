@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ITask, ITaskMethods, TaskModel } from '@/types/mongoose/task';
+import type { ITask, ITaskMethods, TaskModel } from '@/types/mongoose/task';
 
 const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 	deleted: {
@@ -12,7 +12,7 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 	creator_pid: Number,
 	status: {
 		type: String,
-		enum : ['open'] // TODO - What else is there?
+		enum: ['open'] // TODO - What else is there?
 	},
 	title_id: String,
 	description: Number,

@@ -1,9 +1,10 @@
-import { createServer, Server } from 'nice-grpc';
+import { createServer } from 'nice-grpc';
 import { BOSSDefinition } from '@pretendonetwork/grpc/boss/boss_service';
 import { apiKeyMiddleware } from '@/services/grpc/boss/middleware/api-key-middleware';
 import { authenticationMiddleware } from '@/services/grpc/boss/middleware/authentication-middleware';
 import { implementation } from '@/services/grpc/boss/implementation';
 import { config } from '@/config-manager';
+import type { Server } from 'nice-grpc';
 
 export async function startGRPCServer(): Promise<void> {
 	const server: Server = createServer();

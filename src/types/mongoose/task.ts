@@ -1,4 +1,4 @@
-import { Model, HydratedDocument } from 'mongoose';
+import type { Model, HydratedDocument } from 'mongoose';
 
 export interface ITask {
 	deleted: boolean;
@@ -6,17 +6,17 @@ export interface ITask {
 	in_game_id: string;
 	boss_app_id: string;
 	creator_pid: number;
-	status: 'open';  // TODO - Make this a union. What else is there?
+	status: 'open'; // TODO - Make this a union. What else is there?
 	title_id: string;
 	description: string;
 	created: bigint;
 	updated: bigint;
 }
 
-export interface ITaskMethods {}
+export interface ITaskMethods { }
 
-interface ITaskQueryHelpers {}
+interface ITaskQueryHelpers { }
 
-export type TaskModel = Model<ITask, ITaskQueryHelpers, ITaskMethods>
+export type TaskModel = Model<ITask, ITaskQueryHelpers, ITaskMethods>;
 
-export type HydratedTaskDocument = HydratedDocument<ITask, ITaskMethods>
+export type HydratedTaskDocument = HydratedDocument<ITask, ITaskMethods>;

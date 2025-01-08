@@ -1,9 +1,10 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { DeleteTaskRequest } from '@pretendonetwork/grpc/boss/delete_task';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { getTask } from '@/database';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
-import { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
+import type { CallContext } from 'nice-grpc';
+import type { DeleteTaskRequest } from '@pretendonetwork/grpc/boss/delete_task';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 
 export async function deleteTask(request: DeleteTaskRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
 	// * This is asserted in authentication middleware, we know this is never null

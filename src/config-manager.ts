@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs-extra';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { LOG_INFO, LOG_WARN, LOG_ERROR } from '@/logger';
-import { DisabledFeatures, Config } from '@/types/common/config';
+import type mongoose from 'mongoose';
+import type { DisabledFeatures, Config } from '@/types/common/config';
 
 dotenv.config();
 
@@ -78,7 +78,7 @@ export const config: Config = {
 			secret: process.env.PN_BOSS_CONFIG_S3_ACCESS_SECRET?.trim() || ''
 		},
 		disk_path: process.env.PN_BOSS_CONFIG_CDN_DISK_PATH?.trim() || ''
-	},
+	}
 };
 
 LOG_INFO('Config loaded, checking integrity');

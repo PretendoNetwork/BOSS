@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { AutoIncrementID }  from '@typegoose/auto-increment';
-import { IFile, IFileMethods, FileModel } from '@/types/mongoose/file';
+import { AutoIncrementID } from '@typegoose/auto-increment';
+import type { IFile, IFileMethods, FileModel } from '@/types/mongoose/file';
 
 const FileSchema = new mongoose.Schema<IFile, FileModel, IFileMethods>({
 	deleted: {

@@ -1,12 +1,13 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5, uploadCDNFile } from '@/util';
 import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import { config } from '@/config-manager';
+import type { CallContext } from 'nice-grpc';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
@@ -172,7 +173,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 			notifyOnNew: file.notify_on_new,
 			notifyLed: file.notify_led,
 			createdTimestamp: file.created,
-			updatedTimestamp: file.updated,
+			updatedTimestamp: file.updated
 		}
 	};
 }

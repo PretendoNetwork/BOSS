@@ -1,4 +1,4 @@
-import { Model, HydratedDocument } from 'mongoose';
+import type { Model, HydratedDocument } from 'mongoose';
 
 export interface ICECSlot {
 	creator_pid: number;
@@ -10,6 +10,6 @@ export interface ICECSlotMethods {}
 
 interface ICECSlotQueryHelpers {}
 
-export type CECSlotModel = Model<ICECSlot, ICECSlotQueryHelpers, ICECSlotMethods>
+export type CECSlotModel = Model<ICECSlot, ICECSlotQueryHelpers, ICECSlotMethods>;
 
-export type HydratedCECSlotDocument = HydratedDocument<ICECSlot, ICECSlotMethods>
+export type HydratedCECSlotDocument = HydratedDocument<ICECSlot, ICECSlotMethods>;
