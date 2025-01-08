@@ -6,6 +6,7 @@ import RequestException from '@/request-exception';
 import { LOG_INFO, LOG_SUCCESS } from '@/logger';
 import { config } from '@/config-manager';
 import parseUserAgentMiddleware from '@/middleware/parse-user-agent';
+import authenticationMiddleware from '@/middleware/authentication';
 import nppl from '@/services/nppl';
 import npts from '@/services/npts';
 import npdi from '@/services/npdi';
@@ -28,6 +29,7 @@ app.use(express.urlencoded({
 }));
 
 app.use(parseUserAgentMiddleware);
+app.use(authenticationMiddleware);
 
 app.use(nppl);
 app.use(npts);

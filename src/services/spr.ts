@@ -3,7 +3,7 @@ import express from 'express';
 import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
-import { getFriends, getNEXDataByPID } from '@/util';
+import { getFriends } from '@/util';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { SendMode } from '@/types/common/spr-slot';
@@ -70,19 +70,13 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		return;
 	}
 
-	if (!request.pid) {
-		response.sendStatus(400);
-		return;
-	}
-
-	const nexAccount = await getNEXDataByPID(request.pid);
-	if (!nexAccount) {
+	if (!request.pid || !request.nexAccount) {
 		response.sendStatus(400);
 		return;
 	}
 
 	// * Check that the account is a 3DS and isn't banned
-	if (!nexAccount.friendCode || nexAccount.accessLevel < 0) {
+	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
 		response.sendStatus(400);
 		return;
 	}
