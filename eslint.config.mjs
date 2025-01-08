@@ -32,7 +32,7 @@ export default tseslint.config(
 		// https://eslint.org/docs/rules/
 		extends: [eslint.configs.recommended],
 		rules: {
-			'require-atomic-updates': 'warn',
+			'require-atomic-updates': 'off', // This rule is widely controversial and causes false positives
 			'no-console': 'off',
 			'prefer-const': 'error',
 			'no-var': 'error',
