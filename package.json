@@ -4,11 +4,11 @@
 	"description": "",
 	"main": "dist/server.js",
 	"scripts": {
-		"lint": "npx eslint .",
-		"lint:fix": "npx eslint . --fix",
-		"build": "npm run lint && npm run clean && npx tsc && npx tsc-alias",
-		"clean": "rimraf ./dist",
-		"start": "node --enable-source-maps ."
+		"dev": "tsup --watch --onSuccess \"node dist/server.js\"",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"build": "npm run lint && tsup",
+		"start": "node --enable-source-maps dist/server.js"
 	},
 	"keywords": [],
 	"author": "",
@@ -47,6 +47,7 @@
 		"eslint-import-resolver-typescript": "^3.7.0",
 		"eslint-plugin-import": "^2.31.0",
 		"tsc-alias": "^1.8.10",
+		"tsup": "^8.3.5",
 		"typescript": "^5.7.2",
 		"typescript-eslint": "^8.19.1",
 		"xmlbuilder2": "^3.1.1"
