@@ -34,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@eslint-community/eslint-plugin-eslint-comments": "^4.4.1",
+		"@pretendonetwork/eslint-config": "^0.0.1",
 		"@smithy/types": "^4.0.0",
 		"@stylistic/eslint-plugin": "^2.12.1",
 		"@types/dicer": "^0.2.4",
