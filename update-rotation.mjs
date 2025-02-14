@@ -64,6 +64,7 @@ for (const title of titles) {
 
 	const decryptedFilePath = path.join(decryptedDir, 'VSSetting.byaml');
 	await backupFile(decryptedFilePath);
+	await fs.copyFile(sourceFile, decryptedFilePath);
 
 	const encryptedContents = BOSS.encryptWiiU(decryptedFilePath, PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY, PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY);
 	const hash = crypto.createHash('md5').update(encryptedContents).digest('hex');
