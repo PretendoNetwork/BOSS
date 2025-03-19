@@ -31,7 +31,8 @@ if (process.env.PN_BOSS_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH?.trim()) {
 }
 
 export const disabledFeatures: DisabledFeatures = {
-	s3: false
+	s3: false,
+	spr: false
 };
 
 export const config: Config = {
@@ -78,6 +79,9 @@ export const config: Config = {
 			secret: process.env.PN_BOSS_CONFIG_S3_ACCESS_SECRET?.trim() || ''
 		},
 		disk_path: process.env.PN_BOSS_CONFIG_CDN_DISK_PATH?.trim() || ''
+	},
+	spr: {
+		enabled: process.env.PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED?.trim().toLowerCase() === 'true'
 	}
 };
 
@@ -172,6 +176,15 @@ if (!config.cdn.s3.key) {
 if (!config.cdn.s3.secret) {
 	warnings.push('Failed to find s3 secret key config. Disabling feature. To enable feature set the PN_BOSS_CONFIG_S3_ACCESS_SECRET environment variable');
 	disabledFeatures.s3 = true;
+}
+
+if (!config.spr.enabled) {
+	warnings.push('PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED is not set or disabled. Disabling feature. To enable feature set the PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED environment variable');
+	disabledFeatures.spr = true;
+}
+
+if (config.spr.enabled) {
+	disabledFeatures.spr = false;
 }
 
 if (disabledFeatures.s3) {

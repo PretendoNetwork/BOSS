@@ -2,6 +2,7 @@ import xmlbuilder from 'xmlbuilder';
 import moment from 'moment';
 import express from 'express';
 import subdomain from 'express-subdomain';
+import { disabledFeatures } from '@/config-manager';
 import type { PolicyList } from '@/types/common/policylist';
 
 const nppl = express.Router();
@@ -39,61 +40,110 @@ function get3DSPolicyList(countryCode: string, majorVersion: string): { PolicyLi
 		return null;
 	}
 
-	// TODO - Pull this from the DB and use the country code
-	return {
-		PolicyList: {
-			MajorVersion: Number(majorVersion),
-			MinorVersion: 0,
-			ListId: 1891,
-			DefaultStop: false,
-			ForceVersionUp: false,
-			UpdateTime: moment().utc().format('YYYY-MM-DDTHH:MM:SS+0000'),
-			Priority: [
-				{
-					TitleId: '0004003000008f02',
-					TaskId: 'basho0',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				},
-				{
-					TitleId: '000400300000bc00',
-					TaskId: 'OlvNotf',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				},
-				{
-					TitleId: '000400300000bd00',
-					TaskId: 'OlvNotf',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				},
-				{
-					TitleId: '000400300000be00',
-					TaskId: 'OlvNotf',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				},
-				{
-					TitleId: '0004003000008f02',
-					TaskId: 'pl',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				},
-				{
-					TitleId: '0004013000003400',
-					TaskId: 'sprelay',
-					Level: 'HIGH',
-					Persistent: true, // TODO - What's this?
-					Revive: true // TODO - What's this?
-				}
-			]
-		}
-	};
+	if (!disabledFeatures.spr) {
+		return {
+			PolicyList: {
+				MajorVersion: Number(majorVersion),
+				MinorVersion: 0,
+				ListId: 1891,
+				DefaultStop: false,
+				ForceVersionUp: false,
+				UpdateTime: moment().utc().format('YYYY-MM-DDTHH:MM:SS+0000'),
+				Priority: [
+					{
+						TitleId: '0004003000008f02',
+						TaskId: 'basho0',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000bc00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000bd00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000be00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '0004003000008f02',
+						TaskId: 'pl',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '0004013000003400',
+						TaskId: 'sprelay',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					}
+				]
+			}
+		};
+	} else {
+		return {
+			PolicyList: {
+				MajorVersion: Number(majorVersion),
+				MinorVersion: 0,
+				ListId: 1891,
+				DefaultStop: false,
+				ForceVersionUp: false,
+				UpdateTime: moment().utc().format('YYYY-MM-DDTHH:MM:SS+0000'),
+				Priority: [
+					{
+						TitleId: '0004003000008f02',
+						TaskId: 'basho0',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000bc00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000bd00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '000400300000be00',
+						TaskId: 'OlvNotf',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					},
+					{
+						TitleId: '0004003000008f02',
+						TaskId: 'pl',
+						Level: 'HIGH',
+						Persistent: true, // TODO - What's this?
+						Revive: true // TODO - What's this?
+					}
+				]
+			}
+		};
+	}
 }
 
 function getWiiUPolicyList(countryCode: string, majorVersion: string): { PolicyList: PolicyList } | null {
