@@ -7,7 +7,9 @@ const CECDataSchema = new mongoose.Schema<ICECData, CECDataModel, ICECDataMethod
 	data: String,
 	data_hash: String,
 	size: Number,
-	created: BigInt
+	created: { type: BigInt, index: true }
 });
+
+CECDataSchema.index({ creator_pid: 1, game_id: 1 });
 
 export const CECData = mongoose.model<ICECData, CECDataModel>('CECData', CECDataSchema);

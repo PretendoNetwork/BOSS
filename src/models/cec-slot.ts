@@ -7,4 +7,6 @@ const CECSlotSchema = new mongoose.Schema<ICECSlot, CECSlotModel, ICECSlotMethod
 	latest_data_id: String
 });
 
+CECSlotSchema.index({ creator_pid: 1, game_id: 1 });
+
 export const CECSlot = mongoose.model<ICECSlot, CECSlotModel>('CECSlot', CECSlotSchema);
