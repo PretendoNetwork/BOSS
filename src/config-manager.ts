@@ -183,10 +183,6 @@ if (!config.spr.enabled) {
 	disabledFeatures.spr = true;
 }
 
-if (config.spr.enabled) {
-	disabledFeatures.spr = false;
-}
-
 if (disabledFeatures.s3) {
 	if (!config.cdn.disk_path) {
 		errors.push('s3 file storage is disabled and no CDN disk path was set. Set the PN_BOSS_CONFIG_CDN_DISK_PATH environment variable');
