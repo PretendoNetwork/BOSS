@@ -61,3 +61,6 @@ typings/
 .vscode
 dist
 cdn/storage
+*.byaml
+*.byaml.checksum
+*.bak

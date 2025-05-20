@@ -10,7 +10,23 @@ import xml from 'xml-js';
 
 dotenv.config();
 
+function md5(input) {
+	return crypto.createHash('md5').update(input).digest('hex');
+}
+
+const BOSS_WIIU_AES_KEY_MD5_HASH = '5202ce5099232c3d365e28379790a919';
+const BOSS_WIIU_HMAC_KEY_MD5_HASH = 'b4482fef177b0100090ce0dbeb8ce977';
+
 const { PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY, PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY } = process.env;
+
+if (!PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY || md5(PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY) !== BOSS_WIIU_AES_KEY_MD5_HASH) {
+	console.error('PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY is not set or does not match the expected value');
+	process.exit(1);
+}
+if (!PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY || md5(PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY) !== BOSS_WIIU_HMAC_KEY_MD5_HASH) {
+	console.error('PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY is not set or does not match the expected value');
+	process.exit(1);
+}
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -27,17 +43,35 @@ const askQuestion = (question) => {
 
 const rootDir = import.meta.dirname;
 const sourceFile = path.join(rootDir, 'VSSetting.byaml');
+const checksumFile = path.join(rootDir, 'cdn/VSSetting.byaml.checksum');
 
 const exists = await fs.exists(sourceFile);
 if (!exists) {
-	throw new Error('Source VSSetting.byaml file does not exist');
+	console.error('Source VSSetting.byaml file does not exist');
+	process.exit(1);
 }
+
+const sourceFileContents = await fs.readFile(sourceFile);
 
 const stat = await fs.stat(sourceFile);
 if (stat.mtime.toDateString() !== new Date().toDateString()) {
 	const answer = await askQuestion(`The source file was not updated today (Updated ${stat.mtime.toDateString()}). Do you want to continue? (y/n) `);
 	if (answer.toLowerCase() !== 'y') {
 		process.exit(0);
+	}
+}
+
+const checksumExists = await fs.exists(checksumFile);
+const newChecksum = crypto.createHash('sha256').update(sourceFileContents).digest('hex');
+console.log(`Checksum for source file is ${newChecksum}`);
+if (checksumExists) {
+	const checksum = await fs.readFile(checksumFile, 'utf8');
+
+	if (checksum === newChecksum) {
+		const answer = await askQuestion('The source file has not changed since the last run. Do you want to continue? (y/n) ');
+		if (answer.toLowerCase() !== 'y') {
+			process.exit(0);
+		}
 	}
 }
 
@@ -49,6 +83,11 @@ const titles = [
 
 async function backupFile(filePath) {
 	const copyFilePath = path.join(path.dirname(filePath), `${path.basename(filePath)}.bak`);
+	const exists = await fs.exists(filePath);
+	if (!exists) {
+		console.log(`File ${filePath} does not exist, skipping backup...`);
+		return;
+	}
 	await fs.copyFile(filePath, copyFilePath);
 	console.log(`Backup created of ${filePath} at ${copyFilePath}`);
 }
@@ -113,3 +152,6 @@ for (const title of titles) {
 }
 
 rl.close();
+
+console.log('All tasks completed successfully!');
+await fs.writeFile(checksumFile, newChecksum);
