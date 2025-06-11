@@ -23,7 +23,7 @@
 		"colors": "^1.4.0",
 		"dicer": "^0.3.1",
 		"dotenv": "^16.4.7",
-		"express": "^4.21.2",
+		"express": "^5.1.0",
 		"express-subdomain": "^1.0.6",
 		"fs-extra": "^11.2.0",
 		"moment": "^2.30.1",
