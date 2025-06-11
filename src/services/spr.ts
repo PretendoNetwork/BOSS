@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { Stream } from 'node:stream';
 import express from 'express';
 import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
@@ -7,6 +8,7 @@ import { getFriends } from '@/util';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { SendMode } from '@/types/common/spr-slot';
+import RequestException from '@/request-exception';
 import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
@@ -54,6 +56,10 @@ function multipartParser(request: express.Request, response: express.Response, n
 		part.on('end', () => {
 			files[fileName] = fileBuffer;
 		});
+
+		part.on('error', (error: Error) => {
+			return next(new RequestException(error.message, 400));
+		});
 	});
 
 	dicer.on('finish', function () {
@@ -61,12 +67,11 @@ function multipartParser(request: express.Request, response: express.Response, n
 		return next();
 	});
 
-	dicer.on('error', (error: Error) => {
-		console.error('Multipart parsing error:', error.message);
-		return response.sendStatus(400);
+	Stream.pipeline(request, dicer, (error: Error | null) => {
+		if (error) {
+			return next(new RequestException(error.message, 400));
+		}
 	});
-
-	request.pipe(dicer);
 }
 
 spr.post('/relay/0', multipartParser, async (request, response) => {
