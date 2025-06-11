@@ -46,7 +46,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, 'BOSS app ID must only contain letters and numbers');
 	}
 
-	if (!await getTask(bossAppID, taskID)) {
+	if (!(await getTask(bossAppID, taskID))) {
 		throw new ServerError(Status.NOT_FOUND, `Task ${taskID} does not exist for BOSS app ${bossAppID}`);
 	}
 
