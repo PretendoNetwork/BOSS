@@ -61,6 +61,11 @@ function multipartParser(request: express.Request, response: express.Response, n
 		return next();
 	});
 
+	dicer.on('error', (error: Error) => {
+		console.error('Multipart parsing error:', error.message);
+		return response.sendStatus(400);
+	});
+
 	request.pipe(dicer);
 }
 
