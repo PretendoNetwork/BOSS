@@ -88,7 +88,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 	// * Check that the account is a 3DS and isn't banned
 	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
-		LOG_INFO(`{request.pid}: User is banned`);
+		LOG_INFO(`{request.pid}: User is not a 3DS or is banned`);
 		response.sendStatus(403);
 		return;
 	}
