@@ -18,9 +18,9 @@ npdl.get([
 	languageCode?: string;
 	fileName: string;
 }, any, any, {
-		ap?: string;
-		tm?: string;
-	}>, response) => {
+	ap?: string;
+	tm?: string;
+}>, response) => {
 	const { appID, taskID, countryCode, languageCode, fileName } = request.params;
 
 	const file = await getTaskFile(appID, taskID, fileName, countryCode, languageCode);

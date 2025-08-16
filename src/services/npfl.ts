@@ -15,14 +15,14 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 	appID: string;
 	taskID: string;
 }, any, any, {
-		c?: string;
-		l?: string;
-		a1?: string;
-		a2?: string;
-		a3?: string;
-		ap?: string;
-		tm?: string;
-	}>, response) => {
+	c?: string;
+	l?: string;
+	a1?: string;
+	a2?: string;
+	a3?: string;
+	ap?: string;
+	tm?: string;
+}>, response) => {
 	for (const param in request.query) {
 		// * Beats me why the real server does this.
 		// * Just doing accurate emulation ¯\_(ツ)_/¯

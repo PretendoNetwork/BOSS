@@ -34,7 +34,7 @@
 		"xmlbuilder": "^15.1.1"
 	},
 	"devDependencies": {
-		"@pretendonetwork/eslint-config": "^0.0.6",
+		"@pretendonetwork/eslint-config": "^0.1.1",
 		"@smithy/types": "^4.0.0",
 		"@types/dicer": "^0.2.4",
 		"@types/express": "^4.17.21",
