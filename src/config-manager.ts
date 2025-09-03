@@ -2,6 +2,11 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs-extra';
 import dotenv from 'dotenv';
+import pinoPretty from 'pino-pretty';
+import { pino } from 'pino';
+
+// temporary logger - just for configuration (as log level and format is not yet known in this file)
+const logger = pino(pinoPretty());
 
 dotenv.config();
 
@@ -189,12 +194,12 @@ if (disabledFeatures.s3) {
 }
 
 for (const warning of warnings) {
-	console.warn(warning);
+	logger.warn(warning);
 }
 
 if (errors.length !== 0) {
 	for (const error of errors) {
-		console.error(error);
+		logger.error(error);
 	}
 
 	process.exit(0);
