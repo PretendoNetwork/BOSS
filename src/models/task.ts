@@ -15,7 +15,7 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 		enum: ['open'] // TODO - What else is there?
 	},
 	title_id: String,
-	description: Number,
+	description: String,
 	created: BigInt,
 	updated: BigInt
 }, { id: false });
