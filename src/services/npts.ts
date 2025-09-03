@@ -4,8 +4,25 @@ import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
+import type { HydratedFileDocument } from '@/types/mongoose/file';
 
 const npts = express.Router();
+
+function buildFile(file: HydratedFileDocument): any {
+	return {
+		Filename: file.name,
+		DataId: file.data_id,
+		Type: file.type,
+		Url: `https://${config.domains.npdi}/p01/data/1/${task.title_id}/${file.data_id}/${file.hash}`,
+		Size: file.size,
+		Notify: file.isNew
+			? {
+					New: file.notify_on_new.join(','),
+					LED: file.notify_led
+				}
+			: undefined
+	};
+}
 
 npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) => {
 	const { titleIdHash, taskId } = request.params;
@@ -28,12 +45,7 @@ npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) =>
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: files.map(f => ({
-					Filename: f.name,
-					DataId: f.data_id,
-					Type: f.type,
-					Url: `https://${config.domains.npdi}/p01/data/1/${task.title_id}/${f.data_id}/${f.hash}`
-				}))
+				File: files.map(f => buildFile(f))
 			}
 		}
 	};
@@ -67,12 +79,7 @@ npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId/:fileName', async (request, re
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: {
-					Filename: file.name,
-					DataId: file.data_id,
-					Type: file.type,
-					Url: `https://${config.domains.npdi}/p01/data/1/${task.title_id}/${file.data_id}/${file.hash}`
-				}
+				File: buildFile(file)
 			}
 		}
 	};
