@@ -148,7 +148,7 @@ export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocumen
 
 	return File.findOne<HydratedFileDocument>({
 		deleted: false,
-		data_id: dataID
+		data_id: Number(dataID)
 	});
 }
 

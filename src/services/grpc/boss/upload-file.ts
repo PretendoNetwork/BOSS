@@ -131,7 +131,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 	}
 
 	file = await File.create({
-		task_id: taskID,
+		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
