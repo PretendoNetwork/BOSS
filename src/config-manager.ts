@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs-extra';
 import dotenv from 'dotenv';
-import { LOG_INFO, LOG_WARN, LOG_ERROR } from '@/logger';
 
 dotenv.config();
 
@@ -15,8 +14,6 @@ const BOSS_WIIU_AES_KEY_MD5_HASH = '5202ce5099232c3d365e28379790a919';
 const BOSS_WIIU_HMAC_KEY_MD5_HASH = 'b4482fef177b0100090ce0dbeb8ce977';
 const BOSS_3DS_AES_KEY_MD5_HASH = '86fbc2bb4cb703b2a4c6cc9961319926';
 
-LOG_INFO('Loading config');
-
 const warnings: string[] = [];
 const errors: string[] = [];
 
@@ -28,6 +25,10 @@ export const disabledFeatures = {
 export const config = {
 	http: {
 		port: Number(process.env.PN_BOSS_CONFIG_HTTP_PORT?.trim() || '')
+	},
+	log: {
+		format: process.env.PN_BOSS_CONFIG_LOG_FORMAT?.trim() || 'pretty',
+		level: process.env.PN_BOSS_CONFIG_LOG_LEVEL?.trim() || 'info'
 	},
 	crypto: {
 		wup: {
@@ -81,10 +82,18 @@ export const config = {
 	}
 };
 
-LOG_INFO('Config loaded, checking integrity');
-
 if (!config.http.port) {
 	errors.push('Failed to find HTTP port. Set the PN_BOSS_CONFIG_HTTP_PORT environment variable');
+}
+
+const possibleConfigFormats = ['pretty', 'json'];
+if (!possibleConfigFormats.includes(config.log.format)) {
+	errors.push(`Invalid log format, possible values: ${possibleConfigFormats.join(', ')}`);
+}
+
+const possibleconfigLevels = ['error', 'warn', 'info', 'debug', 'trace'];
+if (!possibleconfigLevels.includes(config.log.level)) {
+	errors.push(`Invalid log level, possible values: ${possibleConfigFormats.join(', ')}`);
 }
 
 if (md5(config.crypto.wup.aes_key) !== BOSS_WIIU_AES_KEY_MD5_HASH) {
@@ -180,12 +189,12 @@ if (disabledFeatures.s3) {
 }
 
 for (const warning of warnings) {
-	LOG_WARN(warning);
+	console.warn(warning);
 }
 
 if (errors.length !== 0) {
 	for (const error of errors) {
-		LOG_ERROR(error);
+		console.error(error);
 	}
 
 	process.exit(0);
