@@ -20,4 +20,6 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 	updated: BigInt
 }, { id: false });
 
+TaskSchema.index({ boss_app_id: 1, id: 1 });
+
 export const Task = mongoose.model<ITask, TaskModel>('Task', TaskSchema);

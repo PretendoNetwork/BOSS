@@ -33,4 +33,7 @@ FileSchema.plugin(AutoIncrementID, {
 	field: 'data_id'
 });
 
+FileSchema.index({ task_id: 1, boss_app_id: 1 });
+FileSchema.index({ task_id: 1, boss_app_id: 1, name: 1 });
+
 export const File = mongoose.model<IFile, FileModel>('File', FileSchema);
