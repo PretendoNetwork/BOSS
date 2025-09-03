@@ -8,6 +8,7 @@ export interface ITask {
 	creator_pid: number;
 	status: 'open'; // TODO - Make this a union. What else is there?
 	title_id: string;
+	title_id_hash: string;
 	description: string;
 	created: bigint;
 	updated: bigint;

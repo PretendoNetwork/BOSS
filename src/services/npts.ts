@@ -10,12 +10,12 @@ import { File } from '@/models/file';
 
 const npts = express.Router();
 
-npts.get('/p01/tasksheet/:id/:hash/:taskId', async (request, response) => {
-	const { id, taskId } = request.params;
+npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) => {
+	const { titleIdHash, taskId } = request.params;
 
 	const task = await Task.findOne({
-		title_id: id,
-		id: taskId
+		id: taskId,
+		title_id_hash: titleIdHash
 	});
 	if (!task) {
 		return response.sendStatus(404);

@@ -6,11 +6,12 @@ import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
 
 const npdi = express.Router();
 
-npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', async (request, response) => {
-	const { dataID } = request.params;
+npdi.get('/p01/data/1/:titleIdHash/:dataId/:fileHash', async (request, response) => {
+	const { dataId, fileHash } = request.params;
 
 	const file = await File.findOne({
-		data_id: dataID
+		data_id: dataId,
+		hash: fileHash
 	});
 	if (!file) {
 		return response.sendStatus(404);
