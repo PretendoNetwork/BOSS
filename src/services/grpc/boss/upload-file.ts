@@ -1,9 +1,10 @@
 import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
-import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5, uploadCDNFile } from '@/util';
+import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5 } from '@/util';
 import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
+import { uploadCdnFile } from '@/cdn';
 import type { CallContext } from 'nice-grpc';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
@@ -112,7 +113,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		// * upload key is not viable, as it is not always
 		// * known during upload
 		const key = `${bossAppID}/${taskID}/${contentHash}`;
-		await uploadCDNFile(key, encryptedData);
+		await uploadCdnFile('taskFile', key, encryptedData);
 	} catch (error: unknown) {
 		let message = 'Unknown file upload error';
 
