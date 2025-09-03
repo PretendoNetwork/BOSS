@@ -10,12 +10,11 @@ import type { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
 import type { HydratedFileDocument, IFile } from '@/types/mongoose/file';
 
 const connection_string: string = config.mongoose.connection_string;
-const options: mongoose.ConnectOptions = config.mongoose.options;
 
 let _connection: mongoose.Connection;
 
 export async function connect(): Promise<void> {
-	await mongoose.connect(connection_string, options);
+	await mongoose.connect(connection_string);
 
 	_connection = mongoose.connection;
 	_connection.on('error', console.error.bind(console, 'connection error:'));

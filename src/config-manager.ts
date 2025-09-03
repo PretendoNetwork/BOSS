@@ -3,8 +3,6 @@ import path from 'node:path';
 import fs from 'fs-extra';
 import dotenv from 'dotenv';
 import { LOG_INFO, LOG_WARN, LOG_ERROR } from '@/logger';
-import type mongoose from 'mongoose';
-import type { DisabledFeatures, Config } from '@/types/common/config';
 
 dotenv.config();
 
@@ -22,20 +20,12 @@ LOG_INFO('Loading config');
 const warnings: string[] = [];
 const errors: string[] = [];
 
-let mongooseConnectOptionsMain: mongoose.ConnectOptions = {};
-
-if (process.env.PN_BOSS_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH?.trim()) {
-	mongooseConnectOptionsMain = fs.readJSONSync(process.env.PN_BOSS_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH?.trim());
-} else {
-	warnings.push('No Mongoose connection options found for main connection. To add connection options, set PN_BOSS_CONFIG_MONGOOSE_CONNECT_OPTIONS_PATH to the path of your options JSON file');
-}
-
-export const disabledFeatures: DisabledFeatures = {
+export const disabledFeatures = {
 	s3: false,
 	spr: false
 };
 
-export const config: Config = {
+export const config = {
 	http: {
 		port: Number(process.env.PN_BOSS_CONFIG_HTTP_PORT?.trim() || '')
 	},
@@ -66,11 +56,9 @@ export const config: Config = {
 		}
 	},
 	mongoose: {
-		connection_string: process.env.PN_BOSS_CONFIG_MONGO_CONNECTION_STRING?.trim() || '',
-		options: mongooseConnectOptionsMain
+		connection_string: process.env.PN_BOSS_CONFIG_MONGO_CONNECTION_STRING?.trim() || ''
 	},
 	cdn: {
-		download_url: process.env.PN_BOSS_CONFIG_CDN_DOWNLOAD_URL?.trim() || '',
 		s3: {
 			endpoint: process.env.PN_BOSS_CONFIG_S3_ENDPOINT?.trim() || '',
 			region: process.env.PN_BOSS_CONFIG_S3_REGION?.trim() || '',
@@ -82,6 +70,14 @@ export const config: Config = {
 	},
 	spr: {
 		enabled: process.env.PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED?.trim().toLowerCase() === 'true'
+	},
+	domains: {
+		npdi: (process.env.PN_BOSS_CONFIG_DOMAINS_NPDI || 'npdi.cdn.pretendo.cc').split(','),
+		npdl: (process.env.PN_BOSS_CONFIG_DOMAINS_NPDL || 'npdl.cdn.pretendo.cc').split(','),
+		npfl: (process.env.PN_BOSS_CONFIG_DOMAINS_NPFL || 'npfl.c.app.pretendo.cc').split(','),
+		nppl: (process.env.PN_BOSS_CONFIG_DOMAINS_NPPL || 'nppl.app.pretendo.cc,nppl.c.app.pretendo.cc').split(','),
+		npts: (process.env.PN_BOSS_CONFIG_DOMAINS_NPTS || 'npts.app.pretendo.cc').split(','),
+		spr: (process.env.PN_BOSS_CONFIG_DOMAINS_SPR || 'service.spr.app.pretendo.cc').split(',')
 	}
 };
 
@@ -141,16 +137,6 @@ if (!config.grpc.friends.api_key) {
 
 if (!config.mongoose.connection_string) {
 	errors.push('Failed to find MongoDB connection string. Set the PN_BOSS_CONFIG_MONGO_CONNECTION_STRING environment variable');
-}
-
-if (!config.cdn.download_url) {
-	errors.push('Failed to find CDN content download URL. Set the PN_BOSS_CONFIG_CDN_DOWNLOAD_URL environment variable');
-} else {
-	const parsedURL = new URL(config.cdn.download_url);
-
-	if (!parsedURL.hostname.startsWith('npdi.cdn')) {
-		errors.push('CDN content download URL *MUST* use the subdomain `npdi.cdn`');
-	}
 }
 
 if (!config.cdn.s3.endpoint) {
