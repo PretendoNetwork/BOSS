@@ -17,8 +17,6 @@ export function getCliContext(): CliContext {
 		throw new Error('Missing env variable PN_BOSS_CLI_GRPC_APIKEY');
 	}
 
-	console.log(`Connecting to BOSS server at ${grpcHost}`);
-
 	const channel = createChannel(grpcHost);
 	const client: BOSSClient = createClient(BOSSDefinition, channel, {
 		'*': {
@@ -31,4 +29,11 @@ export function getCliContext(): CliContext {
 	return {
 		grpc: client
 	};
+}
+
+export function prettyTrunc(str: string, len: number): string {
+	if (str.length > len) {
+		return `${str.slice(0, len)}...`;
+	}
+	return str;
 }
