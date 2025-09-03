@@ -1,7 +1,8 @@
 {
 	"name": "boss",
+	"description": "Pretendo BOSS server implementation",
 	"version": "2.0.0",
-	"description": "",
+	"license": "AGPL-3.0-only",
 	"main": "dist/server.js",
 	"scripts": {
 		"dev": "tsup --watch --onSuccess \"node dist/server.js\"",
@@ -10,9 +11,6 @@
 		"build": "tsup && tsc --noEmit",
 		"start": "node --enable-source-maps dist/server.js"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.723.0",
 		"@pretendonetwork/boss-crypto": "^1.0.0",
