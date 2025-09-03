@@ -16,6 +16,7 @@ import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/ge
 import type { NodeJsClient } from '@smithy/types';
 import type { Response } from 'express';
 import type { Readable } from 'node:stream';
+import type { Stats } from 'node:fs';
 
 let s3: NodeJsClient<S3Client>;
 
@@ -96,6 +97,14 @@ export function isValidFileType(type: string): boolean {
 
 export function isValidFileNotifyCondition(condition: string): boolean {
 	return VALID_FILE_NOTIFY_CONDITIONS.includes(condition);
+}
+
+export async function fileStatOrNull(filePath: string): Promise<Stats | null> {
+	try {
+		return await fs.stat(filePath);
+	} catch {
+		return null;
+	}
 }
 
 export async function getUserDataByPID(pid: number): Promise<GetUserDataResponse | null> {
