@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { Stream } from 'node:stream';
+import { buffer as bufferConsumer } from 'node:stream/consumers';
 import fs from 'fs-extra';
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { config, disabledFeatures } from '@/config-manager';
@@ -24,7 +25,8 @@ if (!disabledFeatures.s3) {
 }
 
 export const cdnNamespace = {
-	spr: 'spr'
+	spr: 'spr',
+	taskFile: 'taskFile'
 } as const;
 export type CdnNamespace = keyof typeof cdnNamespace;
 
@@ -60,6 +62,14 @@ export async function getCdnFileAsStream(namespace: CdnNamespace, key: string): 
 	}
 
 	return response.Body;
+}
+
+export async function getCdnFileAsBuffer(namespace: CdnNamespace, key: string): Promise<Buffer | null> {
+	const stream = await getCdnFileAsStream(namespace, key);
+	if (!stream) {
+		return null;
+	}
+	return bufferConsumer(stream);
 }
 
 export async function uploadCdnFile(namespace: CdnNamespace, key: string, data: Buffer): Promise<void> {
