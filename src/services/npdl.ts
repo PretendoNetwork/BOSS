@@ -1,9 +1,10 @@
 import { Stream } from 'node:stream';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
 import { getCDNFileStream } from '@/util';
-import { LOG_ERROR } from '@/logger';
+import { logger } from '@/logger';
+import { config } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
 
 const npdl = express.Router();
 
@@ -42,7 +43,7 @@ npdl.get([
 
 	Stream.pipeline(readStream, response, (err) => {
 		if (err) {
-			LOG_ERROR('Error with response stream: ' + err.message);
+			logger.error('Error with response stream: ' + err.message);
 			response.end();
 		}
 	});
@@ -50,6 +51,6 @@ npdl.get([
 
 const router = express.Router();
 
-router.use(subdomain('npdl.cdn', npdl));
+router.use(restrictHostnames(config.domains.npdl, npdl));
 
 export default router;

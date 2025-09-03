@@ -1,55 +1,46 @@
-import fs from 'fs-extra';
-import colors from 'colors';
+import { pino } from 'pino';
+import pinoPretty from 'pino-pretty';
+import { pinoHttp } from 'pino-http';
+import { config } from '@/config-manager';
+import type { SerializedRequest, SerializedResponse } from 'pino';
 
-colors.enable();
+const pretty = config.log.format == 'pretty'
+	? pinoPretty({
+			customPrettifiers: {
+				// Clean up Express types for developer eyes
+				req(inputData, _key, _log, { colors }) {
+					const req = inputData as SerializedRequest;
+					return `${colors.bold(req.method)} ${req.headers.host}${req.url} (${req.remoteAddress}:${req.remotePort})`;
+				},
+				res(inputData, _key, _log, { colors }) {
+					const res = inputData as SerializedResponse;
+					const color = ((): (val: any) => string => {
+						if (res.statusCode >= 500) {
+							return colors.red;
+						} else if (res.statusCode >= 400) {
+							return colors.yellow;
+						} else if (res.statusCode >= 200) {
+							return colors.green;
+						} else {
+							return colors.reset;
+						}
+					})();
 
-const root = process.env.PN_BOSS_CONFIG_LOGGER_PATH ? process.env.PN_BOSS_CONFIG_LOGGER_PATH : `${__dirname}/..`;
-fs.ensureDirSync(`${root}/logs`);
+					return `${color(res.statusCode)} (${res.headers['content-length']} bytes)`;
+				}
+			}
+		})
+	: undefined;
 
-const streams = {
-	latest: fs.createWriteStream(`${root}/logs/latest.log`),
-	success: fs.createWriteStream(`${root}/logs/success.log`),
-	error: fs.createWriteStream(`${root}/logs/error.log`),
-	warn: fs.createWriteStream(`${root}/logs/warn.log`),
-	info: fs.createWriteStream(`${root}/logs/info.log`)
-} as const;
+// Main logger object
+export const logger = pino({
+	level: config.log.level,
 
-function getCurrentTimestamp(): string {
-	const date = new Date();
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0'); // * Months are 0-indexed
-	const day = String(date.getDate()).padStart(2, '0');
-	const hours = String(date.getHours()).padStart(2, '0');
-	const minutes = String(date.getMinutes()).padStart(2, '0');
-	const seconds = String(date.getSeconds()).padStart(2, '0');
+	customLevels: {
+		success: 35 // between INFO and WARN
+	}
+}, pretty);
 
-	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-export function LOG_SUCCESS(input: string): void {
-	input = `[${getCurrentTimestamp()}] [SUCCESS]: ${input}`;
-	streams.success.write(`${input}\n`);
-
-	console.log(`${input}`.green.bold);
-}
-
-export function LOG_ERROR(input: string): void {
-	input = `[${getCurrentTimestamp()}] [ERROR]: ${input}`;
-	streams.error.write(`${input}\n`);
-
-	console.error(`${input}`.red.bold);
-}
-
-export function LOG_WARN(input: string): void {
-	input = `[${getCurrentTimestamp()}] [WARN]: ${input}`;
-	streams.warn.write(`${input}\n`);
-
-	console.log(`${input}`.yellow.bold);
-}
-
-export function LOG_INFO(input: string): void {
-	input = `[${getCurrentTimestamp()}] [INFO]: ${input}`;
-	streams.info.write(`${input}\n`);
-
-	console.log(`${input}`.cyan.bold);
-}
+export const loggerHttp = pinoHttp({
+	logger: logger
+});

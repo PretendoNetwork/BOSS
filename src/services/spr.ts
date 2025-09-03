@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import { Stream } from 'node:stream';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends } from '@/util';
@@ -9,8 +8,10 @@ import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { SendMode } from '@/types/common/spr-slot';
 import RequestException from '@/request-exception';
+import { config } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
+import { logger } from '@/logger';
 import type { SPRSlot } from '@/types/common/spr-slot';
-import { LOG_WARN, LOG_INFO } from '@/logger';
 
 const spr = express.Router();
 
@@ -88,7 +89,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 	// * Check that the account is a 3DS and isn't banned
 	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
-		LOG_INFO(`{request.pid}: User is not a 3DS or is banned`);
+		logger.info(`{request.pid}: User is not a 3DS or is banned`);
 		response.sendStatus(403);
 		return;
 	}
@@ -96,7 +97,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	const sprMetadataBuffer: Buffer | undefined = request.files['spr-meta'];
 
 	if (!sprMetadataBuffer) {
-		LOG_WARN(`{request.pid}: Missing spr-meta file`);
+		logger.warn(`{request.pid}: Missing spr-meta file`);
 		response.sendStatus(400);
 		return;
 	}
@@ -108,7 +109,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	const metadataHeaders = sprMetadata.split('\r\n'); // * Split header lines
 
 	if (metadataHeaders.length < 1) {
-		LOG_WARN(`{request.pid}: spr-meta file is too short / empty`);
+		logger.warn(`{request.pid}: spr-meta file is too short / empty`);
 		response.sendStatus(400);
 		return;
 	}
@@ -117,7 +118,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		const metadataHeader = metadataHeaders[i];
 		const [header, value] = metadataHeader.split(': '); // * Split header and value
 		if (!header || !value) {
-			LOG_WARN(`{request.pid}: Bad spr-meta entry`);
+			logger.warn(`{request.pid}: Bad spr-meta entry`);
 			response.sendStatus(400);
 			return;
 		}
@@ -126,7 +127,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		// * we can guarantee that i must match with the slot we are looking at except for 0, which will be the slotsize
 		if (i === 0) {
 			if (header !== 'slotsize') {
-				LOG_WARN(`{request.pid}: spr-meta missing slotsize`);
+				logger.warn(`{request.pid}: spr-meta missing slotsize`);
 				response.sendStatus(400);
 				return;
 			}
@@ -136,14 +137,14 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			try {
 				slotsize = parseInt(value);
 			} catch {
-				LOG_WARN(`{request.pid}: Invalid spr-meta slotsize`);
+				logger.warn(`{request.pid}: Invalid spr-meta slotsize`);
 				response.sendStatus(400);
 				return;
 			}
 
 			// * We don't count the slotsize header itself in the slot count
 			if (slotsize !== (metadataHeaders.length - 1)) {
-				LOG_WARN(`{request.pid}: Bad spr-meta slotsize`);
+				logger.warn(`{request.pid}: Bad spr-meta slotsize`);
 				response.sendStatus(400);
 				return;
 			}
@@ -154,7 +155,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		const metadata = value.split(','); // * Split the value to get the metadata
 
 		if (metadata.length !== 3) {
-			LOG_WARN(`{request.pid}: Bad spr-meta entry param count`);
+			logger.warn(`{request.pid}: Bad spr-meta entry param count`);
 			response.sendStatus(400);
 			return;
 		}
@@ -167,7 +168,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			gameID = parseInt(metadata[1], 16);
 			size = parseInt(metadata[2]);
 		} catch {
-			LOG_WARN(`{request.pid}: Invalid spr-meta entry params`);
+			logger.warn(`{request.pid}: Invalid spr-meta entry params`);
 			response.sendStatus(400);
 			return;
 		}
@@ -178,13 +179,13 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			const slotData: Buffer | undefined = request.files['spr-slot' + slot];
 
 			if (!slotData) {
-				LOG_WARN(`{request.pid}: Missing slot data file`);
+				logger.warn(`{request.pid}: Missing slot data file`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.length !== size) {
-				LOG_WARN(`{request.pid}: Invalid slot data size`);
+				logger.warn(`{request.pid}: Invalid slot data size`);
 				response.sendStatus(400);
 				return;
 			}
@@ -199,25 +200,25 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 			// * Check that we at least have enough size for the StreetPass header
 			if (slotData.length < 0x12) {
-				LOG_WARN(`{request.pid}: Slot is too short`);
+				logger.warn(`{request.pid}: Slot is too short`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE() !== 0x6161) {
-				LOG_WARN(`{request.pid}: Slot header missmatch`);
+				logger.warn(`{request.pid}: Slot header missmatch`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE(4) !== size) {
-				LOG_WARN(`{request.pid}: Slot bad size`);
+				logger.warn(`{request.pid}: Slot bad size`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE(8) !== gameID) {
-				LOG_WARN(`{request.pid}: Slot bad gameID`);
+				logger.warn(`{request.pid}: Slot bad gameID`);
 				response.sendStatus(400);
 				return;
 			}
@@ -296,6 +297,6 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 const router = express.Router();
 
-router.use(subdomain('service.spr.app', spr));
+router.use(restrictHostnames(config.domains.spr, spr));
 
 export default router;

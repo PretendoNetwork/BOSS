@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import { getTaskFilesWithAttributes } from '@/database';
+import { restrictHostnames } from '@/middleware/host-limit';
+import { config } from '@/config-manager';
 
 const ALLOWED_QUERY_PARMS = [
 	'c', 'l',
@@ -109,6 +110,6 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 
 const router = express.Router();
 
-router.use(subdomain('npfl.c.app', npfl));
+router.use(restrictHostnames(config.domains.npfl, npfl));
 
 export default router;

@@ -6,7 +6,7 @@ import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
 import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
 import { config, disabledFeatures } from '@/config-manager';
-import { LOG_ERROR } from '@/logger';
+import { logger } from './logger';
 import type { FriendsClient } from '@pretendonetwork/grpc/friends/friends_service';
 import type { AccountClient } from '@pretendonetwork/grpc/account/account_service';
 import type { S3Client } from '@aws-sdk/client-s3';
@@ -72,7 +72,7 @@ export function fileErrCallback(response: Response) {
 				if (!response.headersSent) {
 					response.status(500).send('Server Error');
 				}
-				LOG_ERROR('Error in sending file: ' + err.message);
+				logger.error('Error in sending file: ' + err.message);
 			}
 		}
 	};

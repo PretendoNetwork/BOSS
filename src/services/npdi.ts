@@ -1,8 +1,9 @@
 import path from 'node:path';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import { fileErrCallback } from '@/util';
 import { __appRoot } from '@/app-root';
+import { restrictHostnames } from '@/middleware/host-limit';
+import { config } from '@/config-manager';
 
 const npdi = express.Router();
 
@@ -22,6 +23,6 @@ npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
 
 const router = express.Router();
 
-router.use(subdomain('npdi.cdn', npdi));
+router.use(restrictHostnames(config.domains.npdi, npdi));
 
 export default router;

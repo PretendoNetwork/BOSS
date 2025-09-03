@@ -1,8 +1,8 @@
 import xmlbuilder from 'xmlbuilder';
 import moment from 'moment';
 import express from 'express';
-import subdomain from 'express-subdomain';
-import { disabledFeatures } from '@/config-manager';
+import { config, disabledFeatures } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
 import type { PolicyList } from '@/types/common/policylist';
 
 const nppl = express.Router();
@@ -183,7 +183,8 @@ function getWiiUPolicyList(countryCode: string, majorVersion: string): { PolicyL
 
 const router = express.Router();
 
-router.use(subdomain('nppl.c.app', nppl)); // * 3DS
-router.use(subdomain('nppl.app', nppl)); // * WiiU
+// 3DS hosts on nppl.c.app
+// WiiU hosts on nppl.app
+router.use(restrictHostnames(config.domains.nppl, nppl));
 
 export default router;
