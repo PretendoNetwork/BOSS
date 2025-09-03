@@ -2,8 +2,7 @@ import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
-import { Task } from '@/models/task';
-import { File } from '@/models/file';
+import { getTask, getTaskFile, getTaskFiles } from '@/database';
 import type { HydratedFileDocument } from '@/types/mongoose/file';
 import type { HydratedTaskDocument } from '@/types/mongoose/task';
 
@@ -16,29 +15,24 @@ function buildFile(task: HydratedTaskDocument, file: HydratedFileDocument): any 
 		Type: file.type,
 		Url: `https://${config.domains.npdi}/p01/data/1/${task.title_id}/${file.data_id}/${file.hash}`,
 		Size: file.size,
-		Notify: file.isNew
-			? {
-					New: file.notify_on_new.join(','),
-					LED: file.notify_led
-				}
-			: undefined
+		Notify: {
+			New: file.notify_on_new.join(','),
+			LED: file.notify_led
+		}
 	};
 }
 
-npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) => {
-	const { titleIdHash, taskId } = request.params;
+// TODO tasksheet ID is unused - what is it for?
 
-	const task = await Task.findOne({
-		id: taskId,
-		title_id_hash: titleIdHash
-	});
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
+	const { bossAppId, taskId } = request.params;
+
+	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const files = await File.find({
-		task_id: taskId
-	});
+	const files = await getTaskFiles(false, bossAppId, taskId);
 
 	const xmlContent = {
 		TaskSheet: {
@@ -55,21 +49,15 @@ npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) =>
 	response.send(xmlbuilder.create(xmlContent, { headless: true }).end({ pretty: true }));
 });
 
-npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId/:fileName', async (request, response) => {
-	const { titleIdHash, taskId, fileName } = request.params;
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, response) => {
+	const { bossAppId, taskId, fileName } = request.params;
 
-	const task = await Task.findOne({
-		id: taskId,
-		title_id_hash: titleIdHash
-	});
+	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const file = await File.findOne({
-		name: fileName,
-		task_id: taskId
-	});
+	const file = await getTaskFile(bossAppId, taskId, fileName);
 	if (!file) {
 		return response.sendStatus(404);
 	}

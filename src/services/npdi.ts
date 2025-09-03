@@ -1,19 +1,19 @@
 import express from 'express';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
-import { File } from '@/models/file';
 import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
+import { getTaskFileByDataID } from '@/database';
 
 const npdi = express.Router();
 
-npdi.get('/p01/data/1/:titleIdHash/:dataId/:fileHash', async (request, response) => {
-	const { dataId, fileHash } = request.params;
+npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) => {
+	const { dataId, fileHash, bossAppId } = request.params;
 
-	const file = await File.findOne({
-		data_id: dataId,
-		hash: fileHash
-	});
+	const file = await getTaskFileByDataID(BigInt(dataId));
 	if (!file) {
+		return response.sendStatus(404);
+	}
+	if (file.hash !== fileHash || file.boss_app_id !== bossAppId) {
 		return response.sendStatus(404);
 	}
 
