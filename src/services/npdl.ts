@@ -1,10 +1,8 @@
-import { Stream } from 'node:stream';
 import express from 'express';
 import { getTaskFile } from '@/database';
-import { getCDNFileStream } from '@/util';
-import { logger } from '@/logger';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
+import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
 
 const npdl = express.Router();
 
@@ -31,21 +29,14 @@ npdl.get([
 		return;
 	}
 
-	const key = `${appID}/${taskID}/${file.hash}`;
-	const readStream = await getCDNFileStream(key);
-
+	const readStream = await getCdnFileAsStream('taskFile', file.file_key);
 	if (!readStream) {
 		response.sendStatus(404);
 		return;
 	}
 
-	response.setHeader('Last-Modified', new Date(Number(file.updated)).toUTCString());
-
-	Stream.pipeline(readStream, response, (err) => {
-		if (err) {
-			logger.error('Error with response stream: ' + err.message);
-			response.end();
-		}
+	return streamFileToResponse(response, readStream, {
+		'Last-Modified': new Date(Number(file.updated)).toUTCString()
 	});
 });
 

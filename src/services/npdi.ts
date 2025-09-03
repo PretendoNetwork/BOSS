@@ -1,24 +1,31 @@
-import path from 'node:path';
 import express from 'express';
-import { fileErrCallback } from '@/util';
-import { __appRoot } from '@/app-root';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
+import { File } from '@/models/file';
+import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
 
 const npdi = express.Router();
 
-npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', (request, response) => {
-	const { titleHash, fileHash } = request.params;
-	const contentPath = path.normalize(`${__appRoot}/../cdn/content/encrypted/${titleHash}/${fileHash}`);
+npdi.get('/p01/data/1/:titleHash/:dataID/:fileHash', async (request, response) => {
+	const { dataID } = request.params;
 
-	response.sendFile(contentPath, {
-		headers: {
-			// * The misspelling here is intentional, it's what the official server sets
-			'Content-Type': 'applicatoin/octet-stream',
-			'Content-Disposition': 'attachment',
-			'Content-Transfer-Encoding': 'binary'
-		}
-	}, fileErrCallback(response));
+	const file = await File.findOne({
+		data_id: dataID
+	});
+	if (!file) {
+		return response.sendStatus(404);
+	}
+
+	const fileStream = await getCdnFileAsStream('taskFile', file.file_key);
+	if (!fileStream) {
+		throw new Error('File not found in CDN');
+	}
+	return streamFileToResponse(response, fileStream, {
+		// * The misspelling here is intentional, it's what the official server sets
+		'Content-Type': 'applicatoin/octet-stream',
+		'Content-Disposition': 'attachment',
+		'Content-Transfer-Encoding': 'binary'
+	});
 });
 
 const router = express.Router();

@@ -7,6 +7,7 @@ const FileSchema = new mongoose.Schema<IFile, FileModel, IFileMethods>({
 		type: Boolean,
 		default: false
 	},
+	file_key: String,
 	data_id: Number, // TODO - Wait until https://github.com/typegoose/auto-increment/pull/21 is merged and then change this to BigInt
 	task_id: String,
 	boss_app_id: String,
