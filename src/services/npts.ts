@@ -5,10 +5,11 @@ import { restrictHostnames } from '@/middleware/host-limit';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
 import type { HydratedFileDocument } from '@/types/mongoose/file';
+import type { HydratedTaskDocument } from '@/types/mongoose/task';
 
 const npts = express.Router();
 
-function buildFile(file: HydratedFileDocument): any {
+function buildFile(task: HydratedTaskDocument, file: HydratedFileDocument): any {
 	return {
 		Filename: file.name,
 		DataId: file.data_id,
@@ -45,7 +46,7 @@ npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId', async (request, response) =>
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: files.map(f => buildFile(f))
+				File: files.map(f => buildFile(task, f))
 			}
 		}
 	};
@@ -79,7 +80,7 @@ npts.get('/p01/tasksheet/:id/:titleIdHash/:taskId/:fileName', async (request, re
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: buildFile(file)
+				File: buildFile(task, file)
 			}
 		}
 	};
