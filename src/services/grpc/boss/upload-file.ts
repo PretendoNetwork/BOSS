@@ -5,18 +5,15 @@ import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
 import { uploadCdnFile } from '@/cdn';
-import type { CallContext } from 'nice-grpc';
+import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { CallContext } from 'nice-grpc';
 import type { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
 export async function uploadFile(request: UploadFileRequest, context: CallContext & AuthenticationCallContextExt): Promise<UploadFileResponse> {
-	// * This is asserted in authentication middleware, we know this is never null
-	const user: GetUserDataResponse = context.user!;
-
-	if (!user.permissions?.uploadBossFiles) {
+	if (!hasPermission(context, 'uploadBossFiles')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to upload new files');
 	}
 
@@ -138,7 +135,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		boss_app_id: bossAppID,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
-		creator_pid: user.pid,
+		creator_pid: context.user?.pid,
 		name: name,
 		type: type,
 		hash: contentHash,

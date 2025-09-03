@@ -1,16 +1,13 @@
 import { Status, ServerError } from 'nice-grpc';
 import { getTask } from '@/database';
+import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { UpdateTaskRequest } from '@pretendonetwork/grpc/boss/update_task';
-import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 
 export async function updateTask(request: UpdateTaskRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
-	// * This is asserted in authentication middleware, we know this is never null
-	const user: GetUserDataResponse = context.user!;
-
-	if (!user.permissions?.updateBossTasks) {
+	if (!hasPermission(context, 'updateBossTasks')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to update tasks');
 	}
 
