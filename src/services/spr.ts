@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import { Stream } from 'node:stream';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends } from '@/util';
@@ -9,8 +8,10 @@ import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { SendMode } from '@/types/common/spr-slot';
 import RequestException from '@/request-exception';
-import type { SPRSlot } from '@/types/common/spr-slot';
 import { LOG_WARN, LOG_INFO } from '@/logger';
+import { config } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
+import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
@@ -296,6 +297,6 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 const router = express.Router();
 
-router.use(subdomain('service.spr.app', spr));
+router.use(restrictHostnames(config.domains.spr, spr));
 
 export default router;
