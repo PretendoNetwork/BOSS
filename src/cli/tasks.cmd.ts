@@ -45,16 +45,15 @@ const createCmd = new Command('create')
 	.argument('<app_id>', 'BOSS app to store the task in')
 	.requiredOption('--id <id>', 'Id of the task')
 	.requiredOption('--title-id <titleId>', 'Title ID for the task')
-	.requiredOption('--country <country>', 'Description of the task')
 	.option('--desc [desc]', 'Description of the task')
-	.action(async (appId: string, opts: { id: string; titleId: string; desc?: string; country: string }) => {
+	.action(async (appId: string, opts: { id: string; titleId: string; desc?: string }) => {
 		const ctx = getCliContext();
 		const { task } = await ctx.grpc.registerTask({
 			bossAppId: appId,
 			id: opts.id,
 			titleId: opts.titleId,
 			description: opts.desc ?? '',
-			country: opts.country
+			country: 'This value isnt used'
 		});
 		if (!task) {
 			console.log(`Failed to create task!`);

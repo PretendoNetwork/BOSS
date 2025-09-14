@@ -64,3 +64,4 @@ cdn/storage
 *.byaml
 *.byaml.checksum
 *.bak
+!/seeding/**/*
