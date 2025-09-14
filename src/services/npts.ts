@@ -8,12 +8,14 @@ import type { HydratedTaskDocument } from '@/types/mongoose/task';
 
 const npts = express.Router();
 
+const xmlHeadSettings = { encoding: 'UTF-8', version: '1.0' };
+
 function buildFile(task: HydratedTaskDocument, file: HydratedFileDocument): any {
 	return {
 		Filename: file.name,
 		DataId: file.data_id,
 		Type: file.type,
-		Url: `https://${config.domains.npdi}/p01/data/1/${task.title_id}/${file.data_id}/${file.hash}`,
+		Url: `https://${config.domains.npdi}/p01/data/1/${task.boss_app_id}/${file.data_id}/${file.hash}`,
 		Size: file.size,
 		Notify: {
 			New: file.notify_on_new.join(','),
@@ -21,8 +23,6 @@ function buildFile(task: HydratedTaskDocument, file: HydratedFileDocument): any 
 		}
 	};
 }
-
-// TODO tasksheet ID is unused - what is it for?
 
 npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
 	const { bossAppId, taskId } = request.params;
@@ -46,7 +46,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
 	};
 
 	response.set('Content-Type', 'application/xml; charset=utf-8');
-	response.send(xmlbuilder.create(xmlContent, { headless: true }).end({ pretty: true }));
+	response.send(xmlbuilder.create(xmlContent, xmlHeadSettings).end({ pretty: true }));
 });
 
 npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, response) => {
@@ -74,7 +74,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, resp
 	};
 
 	response.set('Content-Type', 'application/xml; charset=utf-8');
-	response.send(xmlbuilder.create(xmlContent, { headless: true }).end({ pretty: true }));
+	response.send(xmlbuilder.create(xmlContent, xmlHeadSettings).end({ pretty: true }));
 });
 
 const router = express.Router();
