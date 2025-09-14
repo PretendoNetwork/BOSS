@@ -57,7 +57,8 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 
 	const filter: mongoose.FilterQuery<IFile> = {
 		task_id: taskID.slice(0, 7),
-		boss_app_id: bossAppID
+		boss_app_id: bossAppID,
+		$and: []
 	};
 
 	if (!allowDeleted) {
@@ -65,15 +66,25 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 	}
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: { $in: [country] } }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: { $in: [language] } }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
 	}
 
 	return File.find(filter);
@@ -84,7 +95,8 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 
 	const filter: mongoose.FilterQuery<IFile> = {
 		task_id: taskID.slice(0, 7),
-		boss_app_id: bossAppID
+		boss_app_id: bossAppID,
+		$and: []
 	};
 
 	if (!allowDeleted) {
@@ -92,15 +104,21 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 	}
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: { $in: [country] } }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: { $in: [language] } }
+			]
+		});
 	}
 
 	if (attribute1) {
@@ -115,6 +133,10 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 		filter.attribute3 = attribute3;
 	}
 
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
+	}
+
 	return File.find(filter);
 }
 
@@ -125,19 +147,30 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string, cou
 		deleted: false,
 		boss_app_id: bossAppID,
 		task_id: taskID.slice(0, 7),
-		name: name
+		name: name,
+		$and: []
 	};
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: { $in: [country] } }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: { $in: [language] } }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
 	}
 
 	return File.findOne<HydratedFileDocument>(filter);

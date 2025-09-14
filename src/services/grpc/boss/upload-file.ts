@@ -48,18 +48,10 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.NOT_FOUND, `Task ${taskID} does not exist for BOSS app ${bossAppID}`);
 	}
 
-	if (supportedCountries.length === 0) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Must provide at least 1 supported country');
-	}
-
 	for (const country of supportedCountries) {
 		if (!isValidCountryCode(country)) {
 			throw new ServerError(Status.INVALID_ARGUMENT, `${country} is not a valid country`);
 		}
-	}
-
-	if (supportedLanguages.length === 0) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Must provide at least 1 supported language');
 	}
 
 	for (const language of supportedLanguages) {
