@@ -50,7 +50,7 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 		name: ops.fileXml.Filename._text,
 		type: ops.fileXml.Type._text,
 		notifyLed: ops.fileXml.Notify.LED._text === 'true',
-		notifyOnNew: ops.fileXml.Notify.New._text.split(','),
+		notifyOnNew: ops.fileXml.Notify.New._text?.split(',') ?? [],
 		data: fileContents,
 		supportedLanguages: [],
 		supportedCountries: []
@@ -93,7 +93,11 @@ export async function processTasksheet(ctx: CliContext, taskFiles: string[], fil
 	});
 	console.log(`${filename}: Updated title ID and status`);
 
-	for (const file of xmlContents.TaskSheet.Files?.File ?? []) {
+	let xmlFiles = xmlContents.TaskSheet.Files?.File ?? [];
+	if (!Array.isArray(xmlFiles)) {
+		xmlFiles = [xmlFiles];
+	}
+	for (const file of xmlFiles) {
 		await uploadFileIfChanged({
 			bossAppId: bossAppId,
 			ctx: ctx,
