@@ -37,11 +37,14 @@ export async function updateTask(request: UpdateTaskRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, `Status ${updateData.status} is invalid`);
 	}
 
-	task.id = updateData.id;
-	task.boss_app_id = updateData.bossAppId;
-	task.title_id = updateData.titleId;
-	task.status = updateData.status;
-	task.description = updateData.description;
+	if (updateData.id) {
+		task.id = updateData.id.slice(0, 7);
+		task.in_game_id = updateData.id;
+	}
+	task.boss_app_id = updateData.bossAppId ? updateData.bossAppId : task.boss_app_id;
+	task.title_id = updateData.titleId ? updateData.titleId : task.title_id;
+	task.status = updateData.status ? updateData.status : task.status;
+	task.description = updateData.description ? updateData.description : task.description;
 	task.updated = BigInt(Date.now());
 
 	await task.save();
