@@ -95,13 +95,13 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 	const contentHash = md5(encryptedData);
 
 	// * Upload file first to prevent ghost DB entries on upload failures
+	const key = `${bossAppID}/${taskID}/${contentHash}`;
 	try {
 		// * Some tasks have file names which are dynamic.
 		// * They change depending on the files data ID.
 		// * Because of this, using the file name in the
 		// * upload key is not viable, as it is not always
 		// * known during upload
-		const key = `${bossAppID}/${taskID}/${contentHash}`;
 		await uploadCdnFile('taskFile', key, encryptedData);
 	} catch (error: unknown) {
 		let message = 'Unknown file upload error';
@@ -125,6 +125,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 	file = await File.create({
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
+		file_key: key,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
 		creator_pid: context.user?.pid,

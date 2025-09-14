@@ -69,7 +69,7 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 		filter.$and?.push({
 			$or: [
 				{ supported_countries: { $eq: [] } },
-				{ supported_countries: { $in: [country] } }
+				{ supported_countries: country }
 			]
 		});
 	}
@@ -78,7 +78,7 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 		filter.$and?.push({
 			$or: [
 				{ supported_languages: { $eq: [] } },
-				{ supported_languages: { $in: [language] } }
+				{ supported_languages: language }
 			]
 		});
 	}
@@ -107,7 +107,7 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 		filter.$and?.push({
 			$or: [
 				{ supported_countries: { $eq: [] } },
-				{ supported_countries: { $in: [country] } }
+				{ supported_countries: country }
 			]
 		});
 	}
@@ -116,7 +116,7 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 		filter.$and?.push({
 			$or: [
 				{ supported_languages: { $eq: [] } },
-				{ supported_languages: { $in: [language] } }
+				{ supported_languages: language }
 			]
 		});
 	}
@@ -155,7 +155,7 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string, cou
 		filter.$and?.push({
 			$or: [
 				{ supported_countries: { $eq: [] } },
-				{ supported_countries: { $in: [country] } }
+				{ supported_countries: country }
 			]
 		});
 	}
@@ -164,7 +164,7 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string, cou
 		filter.$and?.push({
 			$or: [
 				{ supported_languages: { $eq: [] } },
-				{ supported_languages: { $in: [language] } }
+				{ supported_languages: language }
 			]
 		});
 	}
