@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { Command } from 'commander';
 import { xml2js } from 'xml-js';
+import BOSS from 'boss-js';
 import { getCliContext } from './utils';
 import { seedFolder } from './root';
 import type { CliContext } from './utils';
@@ -21,7 +22,14 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 		console.warn(`${ops.dataId}: Could not find file on disk the specified data ID - skipping`);
 		return;
 	}
-	const fileContents = await fs.readFile(path.join(seedFolder, 'files', newTaskFileName));
+	let fileContents = await fs.readFile(path.join(seedFolder, 'files', newTaskFileName));
+	if (newTaskFileName.startsWith(`${ops.dataId}.enc.`)) {
+		// File is encrypted, let's decrypt before processing
+		console.log(`${ops.dataId}: File is encrypted, decrypting...`);
+		const keys = ops.ctx.getWiiuKeys();
+		const decryptedContents = BOSS.decryptWiiU(fileContents, keys.aesKey, keys.hmacKey);
+		fileContents = decryptedContents.content;
+	}
 
 	const allExistingTaskFiles = await ops.ctx.grpc.listFiles({
 		bossAppId: ops.bossAppId,

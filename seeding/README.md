@@ -10,6 +10,7 @@ npm run cli -- import seed
 
 1. Only files referenced by tasksheets are processed
 2. You can safely run seeding as many times as seeded, it ignores unchanged data.
-3. Files must be prefixed with their Data ID - followed by a `.`. For example: `39015.Festival.byaml` (Everything after the first dot is not enforced, name it appropiately)
-4. Tasksheets must follow this syntax: `1.<BOSS_APP_ID>.<TASKNAME>.taskheet.xml`
-5. Seeding only adds and updates data. Tasksheets or files that are removed are not deleted.
+3. Unencrypted task files must follow this syntax: `<DATA_ID>.<FILENAME>` - For example: `39015.Festival.byaml` (The name unused, but good practice to set it appropiately)
+4. Encrypted task files must follow this syntax: `<DATA_ID>.enc.<FILENAME>` - For example: `39015.enc.Festival.byaml` (The name unused, but good practice to set it appropiately)
+5. Tasksheets must follow this syntax: `1.<BOSS_APP_ID>.<TASKNAME>.taskheet.xml`
+6. Seeding only adds and updates data. Tasksheets or files that are removed are not deleted.
