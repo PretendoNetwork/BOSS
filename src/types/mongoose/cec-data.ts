@@ -6,6 +6,7 @@ export interface ICECData {
 	data: string;
 	data_hash: string;
 	size: number;
+	file_key: string;
 	created: bigint;
 }
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>0005000010162b00</TitleId>
+  <TaskId>schdat2</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>VSSetting.byaml</Filename>
+      <DataId>1790</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/bb6tOEckvgZ50ciH/1790/b3b03feac77deb6e6b76f7cdb8f8e75b</Url>
+      <Size>26588</Size>
+      <Notify>
+        <New>app</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>

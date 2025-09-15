@@ -9,7 +9,8 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"build": "tsup && tsc --noEmit",
-		"start": "node --enable-source-maps dist/server.js"
+		"start": "node --enable-source-maps dist/server.js",
+		"cli": "node --enable-source-maps dist/cli/cli.js"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.723.0",
@@ -17,6 +18,7 @@
 		"@pretendonetwork/grpc": "^1.0.6",
 		"@typegoose/auto-increment": "^3.6.1",
 		"boss-js": "github:PretendoNetwork/boss-js",
+		"commander": "^14.0.0",
 		"dicer": "^0.3.1",
 		"dotenv": "^16.4.7",
 		"express": "^5.1.0",

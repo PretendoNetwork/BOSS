@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>0005000010176a00</TitleId>
+  <TaskId>optdat2</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>Festival.byaml</Filename>
+      <DataId>1357</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/zvGSM4kOrXpkKnpT/1357/7faa9748451ccee23eaabd1dfd19c982</Url>
+      <Size>23184</Size>
+      <Notify>
+        <New>app</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+    <File>
+      <Filename>HapTexture.bfres</Filename>
+      <DataId>1358</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/zvGSM4kOrXpkKnpT/1358/827a01e39f4cd9208b230f5b74d7ede6</Url>
+      <Size>364608</Size>
+      <Notify>
+        <New>app</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+    <File>
+      <Filename>PanelTexture.bfres</Filename>
+      <DataId>1356</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/zvGSM4kOrXpkKnpT/1356/f30e8e623db8cd8f5eb4005d35d7c8bc</Url>
+      <Size>479296</Size>
+      <Notify>
+        <New>app</New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>

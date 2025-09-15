@@ -1,35 +1,17 @@
 import crypto from 'node:crypto';
-import path from 'node:path';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
-import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
 import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
-import { config, disabledFeatures } from '@/config-manager';
+import { config } from '@/config-manager';
 import { logger } from './logger';
 import type { FriendsClient } from '@pretendonetwork/grpc/friends/friends_service';
 import type { AccountClient } from '@pretendonetwork/grpc/account/account_service';
-import type { S3Client } from '@aws-sdk/client-s3';
 import type { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
 import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
-import type { NodeJsClient } from '@smithy/types';
 import type { Response } from 'express';
-import type { Readable } from 'node:stream';
-
-let s3: NodeJsClient<S3Client>;
-
-if (!disabledFeatures.s3) {
-	s3 = new S3({
-		forcePathStyle: false,
-		endpoint: config.cdn.s3.endpoint,
-		region: config.cdn.s3.region,
-		credentials: {
-			accessKeyId: config.cdn.s3.key,
-			secretAccessKey: config.cdn.s3.secret
-		}
-	});
-}
+import type { Stats } from 'node:fs';
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.address}:${config.grpc.account.port}`);
 const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
@@ -98,6 +80,14 @@ export function isValidFileNotifyCondition(condition: string): boolean {
 	return VALID_FILE_NOTIFY_CONDITIONS.includes(condition);
 }
 
+export async function fileStatOrNull(filePath: string): Promise<Stats | null> {
+	try {
+		return await fs.stat(filePath);
+	} catch {
+		return null;
+	}
+}
+
 export async function getUserDataByPID(pid: number): Promise<GetUserDataResponse | null> {
 	try {
 		return await gRPCAccountClient.getUserData({
@@ -157,56 +147,4 @@ export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse
 		// TODO - Handle error
 		return null;
 	}
-}
-
-export async function getCDNFileStream(key: string): Promise<Readable | null> {
-	try {
-		if (disabledFeatures.s3) {
-			return await getLocalCDNFile(key);
-		} else {
-			const response = await s3.send(new GetObjectCommand({
-				Key: key,
-				Bucket: config.cdn.s3.bucket
-			}));
-
-			if (!response.Body) {
-				return null;
-			}
-
-			return response.Body;
-		}
-	} catch {
-		return null;
-	}
-}
-
-export async function getLocalCDNFile(key: string): Promise<fs.ReadStream | null> {
-	const filePath = path.join(config.cdn.disk_path, key);
-
-	if (await !fs.exists(filePath)) {
-		return null;
-	}
-
-	return fs.createReadStream(filePath);
-}
-
-export async function uploadCDNFile(key: string, data: Buffer): Promise<void> {
-	if (disabledFeatures.s3) {
-		await writeLocalCDNFile(key, data);
-	} else {
-		await s3.send(new PutObjectCommand({
-			Key: key,
-			Bucket: config.cdn.s3.bucket,
-			Body: data,
-			ACL: 'private'
-		}));
-	}
-}
-
-export async function writeLocalCDNFile(key: string, data: Buffer): Promise<void> {
-	const filePath = path.join(config.cdn.disk_path, key);
-	const folder = path.dirname(filePath);
-
-	await fs.ensureDir(folder);
-	await fs.writeFile(filePath, data);
 }

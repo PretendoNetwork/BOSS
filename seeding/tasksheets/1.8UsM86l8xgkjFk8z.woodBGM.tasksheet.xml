@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TaskSheet>
+  <TitleId>000500301001420a</TitleId>
+  <TaskId>woodBGM</TaskId>
+  <ServiceStatus>open</ServiceStatus>
+  <Files>
+    <File>
+      <Filename>BGM_BOSS-BASE_20.0_EU</Filename>
+      <DataId>194</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/8UsM86l8xgkjFk8z/194/f42d9eec366bc06759fc49de5084dcfd</Url>
+      <Size>2673547</Size>
+      <Notify>
+        <New></New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+    <File>
+      <Filename>BGM_BOSS-BASE_20.1_EU</Filename>
+      <DataId>193</DataId>
+      <Type>AppData</Type>
+      <Url>https://npdi.cdn.pretendo.cc/p01/data/1/8UsM86l8xgkjFk8z/193/becd80c9a5787ad9719144b629e7d123</Url>
+      <Size>2673547</Size>
+      <Notify>
+        <New></New>
+        <LED>false</LED>
+      </Notify>
+    </File>
+  </Files>
+</TaskSheet>

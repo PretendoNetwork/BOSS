@@ -2,6 +2,7 @@ import type { Model, HydratedDocument } from 'mongoose';
 
 export interface IFile {
 	deleted: boolean;
+	file_key: string;
 	data_id: bigint;
 	task_id: string;
 	boss_app_id: string;

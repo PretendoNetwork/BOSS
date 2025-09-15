@@ -7,6 +7,7 @@ const FileSchema = new mongoose.Schema<IFile, FileModel, IFileMethods>({
 		type: Boolean,
 		default: false
 	},
+	file_key: String,
 	data_id: Number, // TODO - Wait until https://github.com/typegoose/auto-increment/pull/21 is merged and then change this to BigInt
 	task_id: String,
 	boss_app_id: String,
@@ -31,5 +32,8 @@ FileSchema.plugin(AutoIncrementID, {
 	startAt: 50000, // * Start very high to avoid conflicts with Nintendo Data IDs
 	field: 'data_id'
 });
+
+FileSchema.index({ task_id: 1, boss_app_id: 1 });
+FileSchema.index({ task_id: 1, boss_app_id: 1, name: 1 });
 
 export const File = mongoose.model<IFile, FileModel>('File', FileSchema);
