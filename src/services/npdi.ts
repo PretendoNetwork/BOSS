@@ -13,6 +13,7 @@ npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) =
 	if (!file) {
 		return response.sendStatus(404);
 	}
+
 	if (file.hash !== fileHash || file.boss_app_id !== bossAppId) {
 		return response.sendStatus(404);
 	}
@@ -21,6 +22,7 @@ npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) =
 	if (!fileStream) {
 		throw new Error('File not found in CDN');
 	}
+
 	return streamFileToResponse(response, fileStream, {
 		// * The misspelling here is intentional, it's what the official server sets
 		'Content-Type': 'applicatoin/octet-stream',
