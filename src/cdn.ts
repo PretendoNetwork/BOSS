@@ -26,19 +26,19 @@ if (!disabledFeatures.s3) {
 
 export const cdnNamespace = {
 	spr: 'spr',
-	taskFile: 'taskFile'
+	taskFile: 'task-file'
 } as const;
-export type CDNamespace = keyof typeof cdnNamespace;
+export type CDNNamespace = keyof typeof cdnNamespace;
 
-function buildKey(namespace: CDNamespace, key: string): string {
-	return `${namespace}/${key}`;
+function buildKey(namespace: CDNNamespace, key: string): string {
+	return `${cdnNamespace[namespace]}/${key}`;
 }
 
 function buildLocalCDNPath(fullKey: string): string {
 	return path.join(config.cdn.disk_path, fullKey);
 }
 
-export async function getCDNFileAsStream(namespace: CDNamespace, key: string): Promise<Readable | null> {
+export async function getCDNFileAsStream(namespace: CDNNamespace, key: string): Promise<Readable | null> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
@@ -64,7 +64,7 @@ export async function getCDNFileAsStream(namespace: CDNamespace, key: string): P
 	return response.Body;
 }
 
-export async function getCDNFileAsBuffer(namespace: CDNamespace, key: string): Promise<Buffer | null> {
+export async function getCDNFileAsBuffer(namespace: CDNNamespace, key: string): Promise<Buffer | null> {
 	const stream = await getCDNFileAsStream(namespace, key);
 	if (!stream) {
 		return null;
@@ -72,7 +72,7 @@ export async function getCDNFileAsBuffer(namespace: CDNamespace, key: string): P
 	return bufferConsumer(stream);
 }
 
-export async function uploadCDNFile(namespace: CDNamespace, key: string, data: Buffer): Promise<void> {
+export async function uploadCDNFile(namespace: CDNNamespace, key: string, data: Buffer): Promise<void> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
@@ -91,7 +91,7 @@ export async function uploadCDNFile(namespace: CDNamespace, key: string, data: B
 	}));
 }
 
-export async function deleteCDNFile(namespace: CDNamespace, key: string): Promise<void> {
+export async function deleteCDNFile(namespace: CDNNamespace, key: string): Promise<void> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
