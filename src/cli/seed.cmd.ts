@@ -26,7 +26,7 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 	if (newTaskFileName.startsWith(`${ops.dataId}.enc.`)) {
 		// File is encrypted, let's decrypt before processing
 		console.log(`${ops.dataId}: File is encrypted, decrypting...`);
-		const keys = ops.ctx.getWiiuKeys();
+		const keys = ops.ctx.getWiiUKeys();
 		const decryptedContents = BOSS.decryptWiiU(fileContents, keys.aesKey, keys.hmacKey);
 		fileContents = decryptedContents.content;
 	}

@@ -2,11 +2,11 @@ import { BOSSDefinition } from '@pretendonetwork/grpc/boss/boss_service';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import type { BOSSClient } from '@pretendonetwork/grpc/boss/boss_service';
 
-export type WiiuKeys = { aesKey: string; hmacKey: string };
+export type WiiUKeys = { aesKey: string; hmacKey: string };
 
 export type CliContext = {
 	grpc: BOSSClient;
-	getWiiuKeys: () => WiiuKeys;
+	getWiiUKeys: () => WiiUKeys;
 };
 
 export function getCliContext(): CliContext {
@@ -31,7 +31,7 @@ export function getCliContext(): CliContext {
 
 	return {
 		grpc: client,
-		getWiiuKeys(): WiiuKeys {
+		getWiiUKeys(): WiiUKeys {
 			const aesKey = process.env.PN_BOSS_CLI_WIIU_AES_KEY ?? '';
 			const hmacKey = process.env.PN_BOSS_CLI_WIIU_HMAC_KEY ?? '';
 
