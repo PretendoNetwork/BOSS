@@ -2,7 +2,7 @@ import express from 'express';
 import { getTaskFile } from '@/database';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
-import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
+import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
 
 const npdl = express.Router();
 
@@ -29,7 +29,7 @@ npdl.get([
 		return;
 	}
 
-	const readStream = await getCdnFileAsStream('taskFile', file.file_key);
+	const readStream = await getCDNFileAsStream('taskFile', file.file_key);
 	if (!readStream) {
 		response.sendStatus(404);
 		return;

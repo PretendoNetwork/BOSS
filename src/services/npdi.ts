@@ -1,7 +1,7 @@
 import express from 'express';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
-import { getCdnFileAsStream, streamFileToResponse } from '@/cdn';
+import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
 import { getTaskFileByDataID } from '@/database';
 
 const npdi = express.Router();
@@ -17,7 +17,7 @@ npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) =
 		return response.sendStatus(404);
 	}
 
-	const fileStream = await getCdnFileAsStream('taskFile', file.file_key);
+	const fileStream = await getCDNFileAsStream('taskFile', file.file_key);
 	if (!fileStream) {
 		throw new Error('File not found in CDN');
 	}

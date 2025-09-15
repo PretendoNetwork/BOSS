@@ -4,7 +4,7 @@ import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isVali
 import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
-import { uploadCdnFile } from '@/cdn';
+import { uploadCDNFile } from '@/cdn';
 import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
@@ -102,7 +102,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		// * Because of this, using the file name in the
 		// * upload key is not viable, as it is not always
 		// * known during upload
-		await uploadCdnFile('taskFile', key, encryptedData);
+		await uploadCDNFile('taskFile', key, encryptedData);
 	} catch (error: unknown) {
 		let message = 'Unknown file upload error';
 

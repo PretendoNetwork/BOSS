@@ -28,21 +28,21 @@ export const cdnNamespace = {
 	spr: 'spr',
 	taskFile: 'taskFile'
 } as const;
-export type CdnNamespace = keyof typeof cdnNamespace;
+export type CDNamespace = keyof typeof cdnNamespace;
 
-function buildKey(namespace: CdnNamespace, key: string): string {
+function buildKey(namespace: CDNamespace, key: string): string {
 	return `${namespace}/${key}`;
 }
 
-function buildLocalCdnPath(fullKey: string): string {
+function buildLocalCDNPath(fullKey: string): string {
 	return path.join(config.cdn.disk_path, fullKey);
 }
 
-export async function getCdnFileAsStream(namespace: CdnNamespace, key: string): Promise<Readable | null> {
+export async function getCDNFileAsStream(namespace: CDNamespace, key: string): Promise<Readable | null> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
-		const filePath = buildLocalCdnPath(fullKey);
+		const filePath = buildLocalCDNPath(fullKey);
 		const fileInfo = await fileStatOrNull(filePath);
 
 		if (!fileInfo) {
@@ -64,19 +64,19 @@ export async function getCdnFileAsStream(namespace: CdnNamespace, key: string): 
 	return response.Body;
 }
 
-export async function getCdnFileAsBuffer(namespace: CdnNamespace, key: string): Promise<Buffer | null> {
-	const stream = await getCdnFileAsStream(namespace, key);
+export async function getCDNFileAsBuffer(namespace: CDNamespace, key: string): Promise<Buffer | null> {
+	const stream = await getCDNFileAsStream(namespace, key);
 	if (!stream) {
 		return null;
 	}
 	return bufferConsumer(stream);
 }
 
-export async function uploadCdnFile(namespace: CdnNamespace, key: string, data: Buffer): Promise<void> {
+export async function uploadCDNFile(namespace: CDNamespace, key: string, data: Buffer): Promise<void> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
-		const filePath = buildLocalCdnPath(fullKey);
+		const filePath = buildLocalCDNPath(fullKey);
 		const folder = path.dirname(filePath);
 		await fs.ensureDir(folder);
 		await fs.writeFile(filePath, data);
@@ -91,11 +91,11 @@ export async function uploadCdnFile(namespace: CdnNamespace, key: string, data: 
 	}));
 }
 
-export async function deleteCdnFile(namespace: CdnNamespace, key: string): Promise<void> {
+export async function deleteCDNFile(namespace: CDNamespace, key: string): Promise<void> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
-		const filePath = buildLocalCdnPath(fullKey);
+		const filePath = buildLocalCDNPath(fullKey);
 		const fileInfo = await fileStatOrNull(filePath);
 		if (!fileInfo || !fileInfo.isFile()) {
 			return; // Not found or not a file

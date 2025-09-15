@@ -11,7 +11,7 @@ import RequestException from '@/request-exception';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { logger } from '@/logger';
-import { getCdnFileAsBuffer, uploadCdnFile } from '@/cdn';
+import { getCDNFileAsBuffer, uploadCDNFile } from '@/cdn';
 import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
@@ -250,7 +250,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 				if (!slotData || slotData.data_hash !== dataHash) {
 					const fileKey = `${request.pid}-${dataHash}`;
-					await uploadCdnFile('spr', fileKey, sprSlot.data);
+					await uploadCDNFile('spr', fileKey, sprSlot.data);
 					slotData = await CECData.create({
 						creator_pid: request.pid,
 						game_id: sprSlot.gameID,
@@ -279,7 +279,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 				const slotData = await getRandomCECData(userFriends.pids, sprSlot.gameID);
 
 				if (slotData) {
-					const fileData = await getCdnFileAsBuffer('spr', slotData.file_key);
+					const fileData = await getCDNFileAsBuffer('spr', slotData.file_key);
 					if (fileData) {
 						sprData = Buffer.concat([sprData, fileData]);
 						sprSlot.size = slotData.size;
