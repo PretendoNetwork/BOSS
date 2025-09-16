@@ -15,6 +15,8 @@ async function runCleanSprData(): Promise<void> {
 		const deletedData = await deleteOldCECData(timestampInPast, processingLimit);
 		logger.info(`Deleted one batch of ${deletedData.length} CEC data objects, preparing CDN removal`);
 
+		// TODO remove references to CEC datas that have been removed
+
 		// TODO CDN removal
 
 		totalRemoved += deletedData.length;
