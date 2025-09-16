@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { Command } from 'commander';
 import { xml2js } from 'xml-js';
-import BOSS from 'boss-js';
+import { decryptWiiU } from '@pretendonetwork/boss-crypto';
 import { getCliContext } from './utils';
 import { seedFolder } from './root';
 import type { CliContext } from './utils';
@@ -27,7 +27,7 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 		// File is encrypted, let's decrypt before processing
 		console.log(`${ops.dataId}: File is encrypted, decrypting...`);
 		const keys = ops.ctx.getWiiUKeys();
-		const decryptedContents = BOSS.decryptWiiU(fileContents, keys.aesKey, keys.hmacKey);
+		const decryptedContents = decryptWiiU(fileContents, keys.aesKey, keys.hmacKey);
 		fileContents = decryptedContents.content;
 	}
 

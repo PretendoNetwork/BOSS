@@ -17,7 +17,6 @@
 		"@pretendonetwork/boss-crypto": "^1.0.0",
 		"@pretendonetwork/grpc": "^1.0.6",
 		"@typegoose/auto-increment": "^3.6.1",
-		"boss-js": "github:PretendoNetwork/boss-js",
 		"commander": "^14.0.0",
 		"dicer": "^0.3.1",
 		"dotenv": "^16.4.7",

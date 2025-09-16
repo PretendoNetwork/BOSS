@@ -3,10 +3,10 @@
 import path from 'path';
 import crypto from 'crypto';
 import readline from 'readline';
-import BOSS from 'boss-js';
 import fs from 'fs-extra';
 import dotenv from 'dotenv';
 import xml from 'xml-js';
+import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 
 dotenv.config();
 
@@ -105,7 +105,7 @@ for (const title of titles) {
 	await backupFile(decryptedFilePath);
 	await fs.copyFile(sourceFile, decryptedFilePath);
 
-	const encryptedContents = BOSS.encryptWiiU(decryptedFilePath, PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY, PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY);
+	const encryptedContents = encryptWiiU(decryptedFilePath, PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY, PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY);
 	const hash = crypto.createHash('md5').update(encryptedContents).digest('hex');
 	console.log(`Hash for title ${title} is ${hash}`);
 
