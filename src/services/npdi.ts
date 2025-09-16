@@ -23,7 +23,7 @@ npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) =
 		throw new Error('File not found in CDN');
 	}
 
-	return streamFileToResponse(response, fileStream, {
+	return streamFileToResponse(response, fileStream.stream, fileStream.size, {
 		// * The misspelling here is intentional, it's what the official server sets
 		'Content-Type': 'applicatoin/octet-stream',
 		'Content-Disposition': 'attachment',
