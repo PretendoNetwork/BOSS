@@ -216,3 +216,22 @@ export async function getRandomCECData(pids: number[], gameID: number): Promise<
 
 	return null;
 }
+
+export async function deleteOldCECData(olderThan: Date, limit: number): Promise<{ _id: string; file_key: string }[]> {
+	verifyConnected();
+
+	const toDelete = await CECData.find({
+		created: {
+			$lt: olderThan.getTime()
+		}
+	}, { file_key: 1 }, { limit });
+	const ids = toDelete.map(v => v.data);
+
+	await CECData.deleteMany({
+		_id: {
+			$in: ids
+		}
+	});
+
+	return toDelete.map(v => ({ _id: v._id.toString(), file_key: v.file_key }));
+}
