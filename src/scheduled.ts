@@ -1,6 +1,7 @@
 import { CronJob } from 'cron';
 import { logger } from './logger';
 import { deleteOldCECData } from './database';
+import { config } from './config-manager';
 
 async function runCleanSprData(): Promise<void> {
 	const maxAgeMs = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -40,5 +41,7 @@ function registerSchedule(schedule: string, name: string, fn: () => void | Promi
 }
 
 export async function setupScheduler(): Promise<void> {
-	registerSchedule('0 2 * * *', 'clean-spr-data', runCleanSprData);
+	if (config.spr.cleanOldData) {
+		registerSchedule('0 2 * * *', 'clean-spr-data', runCleanSprData);
+	}
 }

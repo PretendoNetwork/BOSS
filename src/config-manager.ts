@@ -75,7 +75,8 @@ export const config = {
 		disk_path: process.env.PN_BOSS_CONFIG_CDN_DISK_PATH?.trim() || ''
 	},
 	spr: {
-		enabled: process.env.PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED?.trim().toLowerCase() === 'true'
+		enabled: process.env.PN_BOSS_CONFIG_STREETPASS_RELAY_ENABLED?.trim().toLowerCase() === 'true',
+		cleanOldData: process.env.PN_BOSS_CONFIG_STREETPASS_RELAY_CLEAN_OLD_DATA?.trim().toLowerCase() === 'true'
 	},
 	domains: {
 		npdi: (process.env.PN_BOSS_CONFIG_DOMAINS_NPDI || 'npdi.cdn.pretendo.cc').split(','),
