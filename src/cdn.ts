@@ -38,7 +38,7 @@ function buildLocalCDNPath(fullKey: string): string {
 	return path.join(config.cdn.disk_path, fullKey);
 }
 
-export async function getCDNFileAsStream(namespace: CDNNamespace, key: string): Promise<Readable | null> {
+export async function getCDNFileAsStream(namespace: CDNNamespace, key: string): Promise<{ size: number | null; stream: Readable } | null> {
 	const fullKey = buildKey(namespace, key);
 
 	if (!s3) {
@@ -49,7 +49,10 @@ export async function getCDNFileAsStream(namespace: CDNNamespace, key: string): 
 			return null;
 		}
 
-		return fs.createReadStream(filePath);
+		return {
+			stream: fs.createReadStream(filePath),
+			size: fileInfo.size
+		};
 	}
 
 	const response = await s3.send(new GetObjectCommand({
@@ -61,15 +64,18 @@ export async function getCDNFileAsStream(namespace: CDNNamespace, key: string): 
 		return null;
 	}
 
-	return response.Body;
+	return {
+		stream: response.Body,
+		size: response.ContentLength ?? null
+	};
 }
 
 export async function getCDNFileAsBuffer(namespace: CDNNamespace, key: string): Promise<Buffer | null> {
-	const stream = await getCDNFileAsStream(namespace, key);
-	if (!stream) {
+	const streamOutput = await getCDNFileAsStream(namespace, key);
+	if (!streamOutput) {
 		return null;
 	}
-	return bufferConsumer(stream);
+	return bufferConsumer(streamOutput.stream);
 }
 
 export async function uploadCDNFile(namespace: CDNNamespace, key: string, data: Buffer): Promise<void> {
@@ -111,8 +117,13 @@ export async function deleteCDNFile(namespace: CDNNamespace, key: string): Promi
 	}));
 }
 
-export function streamFileToResponse(response: Response, stream: Readable, headers: Record<string, string> = {}): void {
+export function streamFileToResponse(response: Response, stream: Readable, size: number | null, headers: Record<string, string> = {}): void {
 	response.setHeaders(new Headers(headers));
+
+	if (size !== null) {
+		response.setHeader('Content-Length', size);
+	}
+
 	Stream.pipeline(stream, response, (err) => {
 		if (err) {
 			logger.error('Error with response stream: ' + err.message);

@@ -35,7 +35,7 @@ npdl.get([
 		return;
 	}
 
-	return streamFileToResponse(response, readStream, {
+	return streamFileToResponse(response, readStream.stream, readStream.size, {
 		'Last-Modified': new Date(Number(file.updated)).toUTCString()
 	});
 });
