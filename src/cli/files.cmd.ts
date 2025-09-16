@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
+import { request } from 'undici';
 import { Command } from 'commander';
 import { decryptWiiU } from '@pretendonetwork/boss-crypto';
 import { getCliContext } from './utils';
@@ -76,18 +77,22 @@ const downloadCmd = new Command('download')
 		}
 
 		const npdi = ctx.getNpdiUrl();
-		const fetchResult = await fetch(`${npdi.url}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`, {
+		const { body, statusCode } = await request(`${npdi.url}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`, {
 			headers: {
 				Host: npdi.host
 			}
 		});
-		if (fetchResult.status > 299) {
-			console.error(`Failed to download: invalid status code (${fetchResult.status})`);
+		if (statusCode > 299) {
+			console.error(`Failed to download: invalid status code (${statusCode})`);
 			process.exit(1);
 		}
 
-		const arrayBuffer = await fetchResult.arrayBuffer();
-		let buffer = Buffer.from(arrayBuffer);
+		const chunks: Buffer[] = [];
+		for await (const chunk of body) {
+			chunks.push(Buffer.from(chunk));
+		}
+
+		let buffer: Buffer = Buffer.concat(chunks);
 
 		if (ops.decrypt) {
 			const keys = ctx.getWiiUKeys();
