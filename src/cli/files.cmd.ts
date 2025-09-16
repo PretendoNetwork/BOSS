@@ -75,7 +75,12 @@ const downloadCmd = new Command('download')
 			process.exit(1);
 		}
 
-		const fetchResult = await fetch(`${ctx.npdiDomain}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`);
+		const npdi = ctx.getNpdiUrl();
+		const fetchResult = await fetch(`${npdi.url}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`, {
+			headers: {
+				Host: npdi.host
+			}
+		});
 		if (fetchResult.status > 299) {
 			console.error(`Failed to download: invalid status code (${fetchResult.status})`);
 			process.exit(1);

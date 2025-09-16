@@ -4,30 +4,30 @@ import dotenv from 'dotenv';
 import type { BOSSClient } from '@pretendonetwork/grpc/boss/boss_service';
 
 export type WiiUKeys = { aesKey: string; hmacKey: string };
+export type NpdiUrl = {
+	host: string;
+	url: string;
+};
 
 export type CliContext = {
 	grpc: BOSSClient;
-	npdiDomain: string;
+	getNpdiUrl: () => NpdiUrl;
 	getWiiUKeys: () => WiiUKeys;
 };
 
 export function getCliContext(): CliContext {
 	dotenv.config();
-	const grpcAddress = process.env.PN_BOSS_CONFIG_GRPC_BOSS_SERVER_ADDRESS ?? '';
-	const grpcPort = process.env.PN_BOSS_CONFIG_GRPC_BOSS_SERVER_PORT ?? '';
-	const grpcKey = process.env.PN_BOSS_CONFIG_GRPC_BOSS_SERVER_API_KEY ?? '';
+	const grpcHost = process.env.PN_BOSS_CLI_GRPC_HOST ?? '';
+	const grpcKey = process.env.PN_BOSS_CLI_GRPC_APIKEY ?? '';
 
-	if (!grpcAddress) {
-		throw new Error('Missing env variable PN_BOSS_CONFIG_GRPC_BOSS_SERVER_ADDRESS');
-	}
-	if (!grpcPort) {
-		throw new Error('Missing env variable PN_BOSS_CONFIG_GRPC_BOSS_SERVER_PORT');
+	if (!grpcHost) {
+		throw new Error('Missing env variable PN_BOSS_CLI_GRPC_HOST');
 	}
 	if (!grpcKey) {
-		throw new Error('Missing env variable PN_BOSS_CONFIG_GRPC_BOSS_SERVER_API_KEY');
+		throw new Error('Missing env variable PN_BOSS_CLI_GRPC_APIKEY');
 	}
 
-	const channel = createChannel(grpcAddress + ':' + grpcPort);
+	const channel = createChannel(grpcHost);
 	const client: BOSSClient = createClient(BOSSDefinition, channel, {
 		'*': {
 			metadata: new Metadata({
@@ -38,16 +38,24 @@ export function getCliContext(): CliContext {
 
 	return {
 		grpc: client,
-		npdiDomain: (process.env.PN_BOSS_CONFIG_DOMAINS_NPDI ?? 'npdi.cdn.pretendo.cc').split(',')[0],
+		getNpdiUrl(): NpdiUrl {
+			const npdiUrl = process.env.PN_BOSS_CLI_NPDI_URL ?? 'https://npdi.cdn.pretendo.cc';
+			const npdiHost = process.env.PN_BOSS_CLI_NPDI_HOST ?? new URL(npdiUrl).host;
+
+			return {
+				url: npdiUrl,
+				host: npdiHost
+			};
+		},
 		getWiiUKeys(): WiiUKeys {
-			const aesKey = process.env.PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY ?? '';
-			const hmacKey = process.env.PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY ?? '';
+			const aesKey = process.env.PN_BOSS_CLI_WIIU_AES_KEY ?? '';
+			const hmacKey = process.env.PN_BOSS_CLI_WIIU_HMAC_KEY ?? '';
 
 			if (!aesKey) {
-				throw new Error('Missing env variable PN_BOSS_CONFIG_BOSS_WIIU_AES_KEY - needed for decryption');
+				throw new Error('Missing env variable PN_BOSS_CLI_WIIU_AES_KEY - needed for decryption');
 			}
 			if (!hmacKey) {
-				throw new Error('Missing env variable PN_BOSS_CONFIG_BOSS_WIIU_HMAC_KEY - needed for decryption');
+				throw new Error('Missing env variable PN_BOSS_CLI_WIIU_HMAC_KEY - needed for decryption');
 			}
 			return {
 				aesKey,
