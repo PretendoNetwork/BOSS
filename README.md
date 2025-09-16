@@ -52,7 +52,7 @@ The CLI is a helper to interact with the content of the BOSS server.
 
 ```sh
 npm run build
-npm run cli -- --help
+./boss --help
 ```
 
 ## CLI configuration

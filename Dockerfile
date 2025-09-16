@@ -40,6 +40,7 @@ ENV NODE_ENV=production
 USER node
 
 COPY --chown=node:node update-rotation.mjs ${app_dir}
+COPY --chown=node:node ./boss ${app_dir}
 COPY --chown=node:node package.json .
 
 COPY --from=dependencies --chown=node:node ${app_dir}/node_modules ${app_dir}/node_modules
