@@ -1,7 +1,8 @@
 import express from 'express';
-import subdomain from 'express-subdomain';
 import { getTaskFile } from '@/database';
-import { getCDNFileStream } from '@/util';
+import { config } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
+import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
 
 const npdl = express.Router();
 
@@ -28,20 +29,19 @@ npdl.get([
 		return;
 	}
 
-	const key = `${appID}/${taskID}/${file.hash}`;
-	const readStream = await getCDNFileStream(key);
-
+	const readStream = await getCDNFileAsStream('taskFile', file.file_key);
 	if (!readStream) {
 		response.sendStatus(404);
 		return;
 	}
 
-	response.setHeader('Last-Modified', new Date(Number(file.updated)).toUTCString());
-	readStream.pipe(response);
+	return streamFileToResponse(response, readStream, {
+		'Last-Modified': new Date(Number(file.updated)).toUTCString()
+	});
 });
 
 const router = express.Router();
 
-router.use(subdomain('npdl.cdn', npdl));
+router.use(restrictHostnames(config.domains.npdl, npdl));
 
 export default router;

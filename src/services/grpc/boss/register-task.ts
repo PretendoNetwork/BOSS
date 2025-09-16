@@ -1,17 +1,15 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { ServerError, Status } from 'nice-grpc';
 import { getTask } from '@/database';
 import { Task } from '@/models/task';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { CallContext } from 'nice-grpc';
+import type { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
 export async function registerTask(request: RegisterTaskRequest, context: CallContext & AuthenticationCallContextExt): Promise<RegisterTaskResponse> {
-	// * This is asserted in authentication middleware, we know this is never null
-	const user: GetUserDataResponse = context.user!;
-
-	if (!user.permissions?.createBossTasks) {
+	if (!hasPermission(context, 'createBossTasks')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to register new tasks');
 	}
 
@@ -54,7 +52,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		id: taskID.slice(0, 7),
 		in_game_id: taskID,
 		boss_app_id: bossAppID,
-		creator_pid: user.pid,
+		creator_pid: context.user?.pid,
 		status: 'open', // TODO - Make this configurable
 		title_id: titleID,
 		description: description,

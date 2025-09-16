@@ -1,4 +1,3 @@
-import { BOSSServiceImplementation } from '@pretendonetwork/grpc/boss/boss_service';
 import { listKnownBOSSApps } from '@/services/grpc/boss/list-known-boss-apps';
 import { listTasks } from '@/services/grpc/boss/list-tasks';
 import { registerTask } from '@/services/grpc/boss/register-task';
@@ -8,6 +7,7 @@ import { listFiles } from '@/services/grpc/boss/list-files';
 import { uploadFile } from '@/services/grpc/boss/upload-file';
 import { updateFileMetadata } from '@/services/grpc/boss/update-file-metadata';
 import { deleteFile } from '@/services/grpc/boss/delete-file';
+import type { BOSSServiceImplementation } from '@pretendonetwork/grpc/boss/boss_service';
 
 export const implementation: BOSSServiceImplementation = {
 	listKnownBOSSApps,

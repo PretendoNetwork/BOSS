@@ -1,20 +1,19 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
-import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5, uploadCDNFile } from '@/util';
+import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5 } from '@/util';
 import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
 import { config } from '@/config-manager';
+import { uploadCDNFile } from '@/cdn';
+import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { CallContext } from 'nice-grpc';
+import type { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
 export async function uploadFile(request: UploadFileRequest, context: CallContext & AuthenticationCallContextExt): Promise<UploadFileResponse> {
-	// * This is asserted in authentication middleware, we know this is never null
-	const user: GetUserDataResponse = context.user!;
-
-	if (!user.permissions?.uploadBossFiles) {
+	if (!hasPermission(context, 'uploadBossFiles')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to upload new files');
 	}
 
@@ -45,22 +44,14 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, 'BOSS app ID must only contain letters and numbers');
 	}
 
-	if (!await getTask(bossAppID, taskID)) {
+	if (!(await getTask(bossAppID, taskID))) {
 		throw new ServerError(Status.NOT_FOUND, `Task ${taskID} does not exist for BOSS app ${bossAppID}`);
-	}
-
-	if (supportedCountries.length === 0) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Must provide at least 1 supported country');
 	}
 
 	for (const country of supportedCountries) {
 		if (!isValidCountryCode(country)) {
 			throw new ServerError(Status.INVALID_ARGUMENT, `${country} is not a valid country`);
 		}
-	}
-
-	if (supportedLanguages.length === 0) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Must provide at least 1 supported language');
 	}
 
 	for (const language of supportedLanguages) {
@@ -104,14 +95,14 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 	const contentHash = md5(encryptedData);
 
 	// * Upload file first to prevent ghost DB entries on upload failures
+	const key = `${bossAppID}/${taskID}/${contentHash}`;
 	try {
 		// * Some tasks have file names which are dynamic.
 		// * They change depending on the files data ID.
 		// * Because of this, using the file name in the
 		// * upload key is not viable, as it is not always
 		// * known during upload
-		const key = `${bossAppID}/${taskID}/${contentHash}`;
-		await uploadCDNFile(key, encryptedData);
+		await uploadCDNFile('taskFile', key, encryptedData);
 	} catch (error: unknown) {
 		let message = 'Unknown file upload error';
 
@@ -132,11 +123,12 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 	}
 
 	file = await File.create({
-		task_id: taskID,
+		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
+		file_key: key,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
-		creator_pid: user.pid,
+		creator_pid: context.user?.pid,
 		name: name,
 		type: type,
 		hash: contentHash,
@@ -172,7 +164,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 			notifyOnNew: file.notify_on_new,
 			notifyLed: file.notify_led,
 			createdTimestamp: file.created,
-			updatedTimestamp: file.updated,
+			updatedTimestamp: file.updated
 		}
 	};
 }

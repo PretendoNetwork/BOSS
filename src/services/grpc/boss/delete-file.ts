@@ -1,15 +1,13 @@
-import { CallContext, Status, ServerError } from 'nice-grpc';
-import { DeleteFileRequest } from '@pretendonetwork/grpc/boss/delete_file';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import { Status, ServerError } from 'nice-grpc';
 import { getTaskFileByDataID } from '@/database';
-import { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
-import { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
+import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import type { CallContext } from 'nice-grpc';
+import type { DeleteFileRequest } from '@pretendonetwork/grpc/boss/delete_file';
+import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
 
 export async function deleteFile(request: DeleteFileRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
-	// * This is asserted in authentication middleware, we know this is never null
-	const user: GetUserDataResponse = context.user!;
-
-	if (!user.permissions?.deleteBossFiles) {
+	if (!hasPermission(context, 'deleteBossFiles')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to delete files');
 	}
 

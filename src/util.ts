@@ -1,29 +1,17 @@
 import crypto from 'node:crypto';
-import path from 'node:path';
-import { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
-import { GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
-import { AccountClient, AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
-import { FriendsClient, FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
-import { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
-import { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
-import { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
-import { config, disabledFeatures } from '@/config-manager';
-
-let s3: S3;
-
-if (!disabledFeatures.s3) {
-	s3 = new S3({
-		forcePathStyle: false,
-		endpoint: config.cdn.s3.endpoint,
-		region: config.cdn.s3.region,
-		credentials: {
-			accessKeyId: config.cdn.s3.key,
-			secretAccessKey: config.cdn.s3.secret
-		}
-	});
-}
+import { AccountDefinition } from '@pretendonetwork/grpc/account/account_service';
+import { FriendsDefinition } from '@pretendonetwork/grpc/friends/friends_service';
+import { config } from '@/config-manager';
+import { logger } from './logger';
+import type { FriendsClient } from '@pretendonetwork/grpc/friends/friends_service';
+import type { AccountClient } from '@pretendonetwork/grpc/account/account_service';
+import type { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
+import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
+import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
+import type { Response } from 'express';
+import type { Stats } from 'node:fs';
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.address}:${config.grpc.account.port}`);
 const gRPCAccountClient: AccountClient = createClient(AccountDefinition, gRPCAccountChannel);
@@ -57,6 +45,21 @@ const VALID_FILE_NOTIFY_CONDITIONS = [
 	'app', 'account'
 ];
 
+export function fileErrCallback(response: Response) {
+	return (err: NodeJS.ErrnoException): void => {
+		if (err) {
+			if (err.code === 'ENOENT') {
+				response.sendStatus(404);
+			} else {
+				if (!response.headersSent) {
+					response.status(500).send('Server Error');
+				}
+				logger.error('Error in sending file: ' + err.message);
+			}
+		}
+	};
+}
+
 export function md5(input: crypto.BinaryLike): string {
 	return crypto.createHash('md5').update(input).digest('hex');
 }
@@ -75,6 +78,14 @@ export function isValidFileType(type: string): boolean {
 
 export function isValidFileNotifyCondition(condition: string): boolean {
 	return VALID_FILE_NOTIFY_CONDITIONS.includes(condition);
+}
+
+export async function fileStatOrNull(filePath: string): Promise<Stats | null> {
+	try {
+		return await fs.stat(filePath);
+	} catch {
+		return null;
+	}
 }
 
 export async function getUserDataByPID(pid: number): Promise<GetUserDataResponse | null> {
@@ -136,56 +147,4 @@ export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse
 		// TODO - Handle error
 		return null;
 	}
-}
-
-export async function getCDNFileStream(key: string): Promise<Readable | fs.ReadStream | null> {
-	try {
-		if (disabledFeatures.s3) {
-			return await getLocalCDNFile(key);
-		} else {
-			const response = await s3.send(new GetObjectCommand({
-				Key: key,
-				Bucket: config.cdn.s3.bucket
-			}));
-
-			if (!response.Body) {
-				return null;
-			}
-
-			return response.Body as Readable;
-		}
-	} catch (error) {
-		return null;
-	}
-}
-
-export async function getLocalCDNFile(key: string): Promise<fs.ReadStream | null> {
-	const filePath = path.join(config.cdn.disk_path, key);
-
-	if (await !fs.exists(filePath)) {
-		return null;
-	}
-
-	return fs.createReadStream(filePath);
-}
-
-export async function uploadCDNFile(key: string, data: Buffer): Promise<void> {
-	if (disabledFeatures.s3) {
-		await writeLocalCDNFile(key, data);
-	} else {
-		await s3.send(new PutObjectCommand({
-			Key: key,
-			Bucket: config.cdn.s3.bucket,
-			Body: data,
-			ACL: 'private'
-		}));
-	}
-}
-
-export async function writeLocalCDNFile(key: string, data: Buffer): Promise<void> {
-	const filePath = path.join(config.cdn.disk_path, key);
-	const folder = path.dirname(filePath);
-
-	await fs.ensureDir(folder);
-	await fs.writeFile(filePath, data);
 }

@@ -34,14 +34,16 @@ RUN npm run build
 FROM base AS final
 ARG app_dir
 
-RUN mkdir -p ${app_dir}/logs && chown node:node ${app_dir}/logs
+RUN chown node:node ${app_dir}
 
 ENV NODE_ENV=production
 USER node
 
-COPY package.json .
+COPY --chown=node:node update-rotation.mjs ${app_dir}
+COPY --chown=node:node ./boss ${app_dir}
+COPY --chown=node:node package.json .
 
-COPY --from=dependencies ${app_dir}/node_modules ${app_dir}/node_modules
-COPY --from=build ${app_dir}/dist ${app_dir}/dist
+COPY --from=dependencies --chown=node:node ${app_dir}/node_modules ${app_dir}/node_modules
+COPY --from=build --chown=node:node ${app_dir}/dist ${app_dir}/dist
 
 CMD ["node", "."]

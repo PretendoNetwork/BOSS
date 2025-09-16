@@ -1,12 +1,18 @@
 import crypto from 'node:crypto';
+import { Stream } from 'node:stream';
 import express from 'express';
-import subdomain from 'express-subdomain';
 import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends } from '@/util';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
-import { SendMode, SPRSlot } from '@/types/common/spr-slot';
+import { SendMode } from '@/types/common/spr-slot';
+import RequestException from '@/request-exception';
+import { config } from '@/config-manager';
+import { restrictHostnames } from '@/middleware/host-limit';
+import { logger } from '@/logger';
+import { getCDNFileAsBuffer, uploadCDNFile } from '@/cdn';
+import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
@@ -33,7 +39,7 @@ function multipartParser(request: express.Request, response: express.Response, n
 		let fileBuffer = Buffer.alloc(0);
 		let fileName = '';
 
-		part.on('header', header => {
+		part.on('header', (header) => {
 			const contentDisposition = header['content-disposition' as keyof object];
 			const regexResult = RE_FILE_NAME.exec(contentDisposition);
 
@@ -53,6 +59,10 @@ function multipartParser(request: express.Request, response: express.Response, n
 		part.on('end', () => {
 			files[fileName] = fileBuffer;
 		});
+
+		part.on('error', (error: Error) => {
+			return next(new RequestException(error.message, 400));
+		});
 	});
 
 	dicer.on('finish', function () {
@@ -60,7 +70,11 @@ function multipartParser(request: express.Request, response: express.Response, n
 		return next();
 	});
 
-	request.pipe(dicer);
+	Stream.pipeline(request, dicer, (error: Error | null) => {
+		if (error) {
+			return next(new RequestException(error.message, 400));
+		}
+	});
 }
 
 spr.post('/relay/0', multipartParser, async (request, response) => {
@@ -70,19 +84,21 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	}
 
 	if (!request.pid || !request.nexAccount) {
-		response.sendStatus(400);
+		response.sendStatus(401);
 		return;
 	}
 
 	// * Check that the account is a 3DS and isn't banned
 	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
-		response.sendStatus(400);
+		logger.info(`{request.pid}: User is not a 3DS or is banned`);
+		response.sendStatus(403);
 		return;
 	}
 
 	const sprMetadataBuffer: Buffer | undefined = request.files['spr-meta'];
 
 	if (!sprMetadataBuffer) {
+		logger.warn(`{request.pid}: Missing spr-meta file`);
 		response.sendStatus(400);
 		return;
 	}
@@ -94,6 +110,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	const metadataHeaders = sprMetadata.split('\r\n'); // * Split header lines
 
 	if (metadataHeaders.length < 1) {
+		logger.warn(`${request.pid}: spr-meta file is too short / empty`);
 		response.sendStatus(400);
 		return;
 	}
@@ -102,6 +119,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		const metadataHeader = metadataHeaders[i];
 		const [header, value] = metadataHeader.split(': '); // * Split header and value
 		if (!header || !value) {
+			logger.warn(`${request.pid}: Bad spr-meta entry`);
 			response.sendStatus(400);
 			return;
 		}
@@ -110,6 +128,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		// * we can guarantee that i must match with the slot we are looking at except for 0, which will be the slotsize
 		if (i === 0) {
 			if (header !== 'slotsize') {
+				logger.warn(`${request.pid}: spr-meta missing slotsize`);
 				response.sendStatus(400);
 				return;
 			}
@@ -119,12 +138,14 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			try {
 				slotsize = parseInt(value);
 			} catch {
+				logger.warn(`${request.pid}: Invalid spr-meta slotsize`);
 				response.sendStatus(400);
 				return;
 			}
 
 			// * We don't count the slotsize header itself in the slot count
 			if (slotsize !== (metadataHeaders.length - 1)) {
+				logger.warn(`${request.pid}: Bad spr-meta slotsize`);
 				response.sendStatus(400);
 				return;
 			}
@@ -135,6 +156,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		const metadata = value.split(','); // * Split the value to get the metadata
 
 		if (metadata.length !== 3) {
+			logger.warn(`${request.pid}: Bad spr-meta entry param count`);
 			response.sendStatus(400);
 			return;
 		}
@@ -147,6 +169,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			gameID = parseInt(metadata[1], 16);
 			size = parseInt(metadata[2]);
 		} catch {
+			logger.warn(`${request.pid}: Invalid spr-meta entry params`);
 			response.sendStatus(400);
 			return;
 		}
@@ -157,11 +180,13 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			const slotData: Buffer | undefined = request.files['spr-slot' + slot];
 
 			if (!slotData) {
+				logger.warn(`${request.pid}: Missing slot data file`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.length !== size) {
+				logger.warn(`${request.pid}: Invalid slot data size`);
 				response.sendStatus(400);
 				return;
 			}
@@ -176,21 +201,25 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 			// * Check that we at least have enough size for the StreetPass header
 			if (slotData.length < 0x12) {
+				logger.warn(`${request.pid}: Slot is too short`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE() !== 0x6161) {
+				logger.warn(`${request.pid}: Slot header missmatch`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE(4) !== size) {
+				logger.warn(`${request.pid}: Slot bad size`);
 				response.sendStatus(400);
 				return;
 			}
 
 			if (slotData.readUInt32LE(8) !== gameID) {
+				logger.warn(`${request.pid}: Slot bad gameID`);
 				response.sendStatus(400);
 				return;
 			}
@@ -202,7 +231,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			sendMode,
 			gameID,
 			size,
-			data,
+			data
 		});
 	}
 
@@ -220,10 +249,12 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 				let slotData = await getDuplicateCECData(request.pid, sprSlot.gameID);
 
 				if (!slotData || slotData.data_hash !== dataHash) {
+					const fileKey = `${request.pid}-${dataHash}`;
+					await uploadCDNFile('spr', fileKey, sprSlot.data);
 					slotData = await CECData.create({
 						creator_pid: request.pid,
 						game_id: sprSlot.gameID,
-						data: sprSlot.data.toString('base64'),
+						file_key: fileKey,
 						data_hash: dataHash,
 						size: sprSlot.size,
 						created: BigInt(Date.now())
@@ -234,7 +265,7 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 					await CECSlot.findOneAndUpdate({
 						creator_pid: request.pid,
 						game_id: slotData.game_id
-					}, {latest_data_id: slotData.id}, {upsert: true});
+					}, { latest_data_id: slotData.id }, { upsert: true });
 				}
 			}
 
@@ -243,17 +274,17 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			}
 
 			// * Receive slot data
+			sprSlot.size = 0;
 			if (sprSlot.sendMode !== SendMode.SendOnly) {
 				const slotData = await getRandomCECData(userFriends.pids, sprSlot.gameID);
 
 				if (slotData) {
-					sprData = Buffer.concat([sprData, Buffer.from(slotData.data, 'base64')]);
-					sprSlot.size = slotData.size;
-				} else {
-					sprSlot.size = 0;
+					const fileData = await getCDNFileAsBuffer('spr', slotData.file_key);
+					if (fileData) {
+						sprData = Buffer.concat([sprData, fileData]);
+						sprSlot.size = slotData.size;
+					}
 				}
-			} else {
-				sprSlot.size = 0;
 			}
 
 			response.setHeader(`X-Spr-Slot${slot}-Result`, `${sprSlot.gameID.toString(16).toUpperCase().padStart(8, '0')},${sprSlot.sendMode},${sprSlot.size}`);
@@ -264,12 +295,11 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		return;
 	}
 
-
 	response.send(sprData);
 });
 
 const router = express.Router();
 
-router.use(subdomain('service.spr.app', spr));
+router.use(restrictHostnames(config.domains.spr, spr));
 
 export default router;

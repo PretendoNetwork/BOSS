@@ -1,4 +1,4 @@
-import { Model, HydratedDocument } from 'mongoose';
+import type { Model, HydratedDocument } from 'mongoose';
 
 export interface ICECData {
 	creator_pid: number;
@@ -6,6 +6,7 @@ export interface ICECData {
 	data: string;
 	data_hash: string;
 	size: number;
+	file_key: string;
 	created: bigint;
 }
 
@@ -13,6 +14,6 @@ export interface ICECDataMethods {}
 
 interface ICECDataQueryHelpers {}
 
-export interface CECDataModel extends Model<ICECData, ICECDataQueryHelpers, ICECDataMethods> {}
+export type CECDataModel = Model<ICECData, ICECDataQueryHelpers, ICECDataMethods>;
 
-export type HydratedCECDataDocument = HydratedDocument<ICECData, ICECDataMethods>
+export type HydratedCECDataDocument = HydratedDocument<ICECData, ICECDataMethods>;

@@ -4,18 +4,17 @@ import { CECSlot } from '@/models/cec-slot';
 import { Task } from '@/models/task';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
-import { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
-import { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
-import { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
-import { HydratedFileDocument, IFile } from '@/types/mongoose/file';
+import type { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
+import type { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
+import type { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
+import type { HydratedFileDocument, IFile } from '@/types/mongoose/file';
 
 const connection_string: string = config.mongoose.connection_string;
-const options: mongoose.ConnectOptions = config.mongoose.options;
 
 let _connection: mongoose.Connection;
 
 export async function connect(): Promise<void> {
-	await mongoose.connect(connection_string, options);
+	await mongoose.connect(connection_string);
 
 	_connection = mongoose.connection;
 	_connection.on('error', console.error.bind(console, 'connection error:'));
@@ -58,7 +57,8 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 
 	const filter: mongoose.FilterQuery<IFile> = {
 		task_id: taskID.slice(0, 7),
-		boss_app_id: bossAppID
+		boss_app_id: bossAppID,
+		$and: []
 	};
 
 	if (!allowDeleted) {
@@ -66,15 +66,25 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 	}
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: country }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: language }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
 	}
 
 	return File.find(filter);
@@ -85,7 +95,8 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 
 	const filter: mongoose.FilterQuery<IFile> = {
 		task_id: taskID.slice(0, 7),
-		boss_app_id: bossAppID
+		boss_app_id: bossAppID,
+		$and: []
 	};
 
 	if (!allowDeleted) {
@@ -93,15 +104,21 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 	}
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: country }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: language }
+			]
+		});
 	}
 
 	if (attribute1) {
@@ -116,6 +133,10 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 		filter.attribute3 = attribute3;
 	}
 
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
+	}
+
 	return File.find(filter);
 }
 
@@ -126,19 +147,30 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string, cou
 		deleted: false,
 		boss_app_id: bossAppID,
 		task_id: taskID.slice(0, 7),
-		name: name
+		name: name,
+		$and: []
 	};
 
 	if (country) {
-		filter.supported_countries = {
-			$in: [country]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: country }
+			]
+		});
 	}
 
 	if (language) {
-		filter.supported_languages = {
-			$in: [language]
-		};
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: language }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
 	}
 
 	return File.findOne<HydratedFileDocument>(filter);
@@ -149,7 +181,7 @@ export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocumen
 
 	return File.findOne<HydratedFileDocument>({
 		deleted: false,
-		data_id: dataID
+		data_id: Number(dataID)
 	});
 }
 
@@ -168,7 +200,7 @@ export async function getRandomCECData(pids: number[], gameID: number): Promise<
 	// * We search through the CECSlot so that everyone has the same chance of getting their data picked up
 	const filter: mongoose.FilterQuery<ICECSlot> = {
 		creator_pid: {
-			$in: pids,
+			$in: pids
 		},
 		game_id: gameID
 	};

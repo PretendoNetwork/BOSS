@@ -1,7 +1,7 @@
 import { Status, ServerError } from 'nice-grpc';
-import { ListFilesRequest, ListFilesResponse } from '@pretendonetwork/grpc/boss/list_files';
 import { isValidCountryCode, isValidLanguage } from '@/util';
 import { getTaskFiles } from '@/database';
+import type { ListFilesRequest, ListFilesResponse } from '@pretendonetwork/grpc/boss/list_files';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
