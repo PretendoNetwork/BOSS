@@ -39,7 +39,6 @@ RUN chown node:node ${app_dir}
 ENV NODE_ENV=production
 USER node
 
-COPY --chown=node:node update-rotation.mjs ${app_dir}
 COPY --chown=node:node ./boss ${app_dir}
 COPY --chown=node:node seeding ${app_dir}
 COPY --chown=node:node package.json .

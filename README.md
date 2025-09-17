@@ -68,4 +68,20 @@ Configurations are loaded through environment variables. `.env` files are suppor
 | `PN_BOSS_CLI_WIIU_HMAC_KEY` | The BOSS WiiU HMAC key, needs to be dumped from a console                                   | Optional |
 | `PN_BOSS_CLI_NPDI_URL`      | The URL of the NPDI part the BOSS HTTP server, only needed when downloading                 | Optional |
 | `PN_BOSS_CLI_NPDI_HOST`     | The Host header for the NPDI requests. Use when you don't have NPDI exposed to the internet | Optional |
- 
+
+## Common CLI operations
+
+```sh
+# Download taskfile and decrypt
+./boss file ls <BOSS_APP_ID> <TASK_ID> # View list of files and their IDs
+./boss file view --decrypt <BOSS_APP_ID> <TASK_ID> <DATA_ID> > output.txt # Download file and decrypt
+```
+
+```sh
+# Update splatoon rotations
+# Run the following for all of these BOSS app ids:
+# - bb6tOEckvgZ50ciH
+# - rjVlM7hUXPxmYQJh
+# - zvGSM4kOrXpkKnpT
+./boss file create <BOSS_APP_ID> schdat2 --name VSSetting.byaml --type AppData --notify-new app --file <FILE_PATH_FOR_VSSETTING>
+```
