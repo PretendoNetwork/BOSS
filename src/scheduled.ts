@@ -2,6 +2,7 @@ import { CronJob } from 'cron';
 import { logger } from './logger';
 import { deleteOldCECData } from './database';
 import { config } from './config-manager';
+import { bulkDeleteCdnFiles } from './cdn';
 
 async function runCleanSprData(): Promise<void> {
 	const maxAgeMs = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -15,9 +16,8 @@ async function runCleanSprData(): Promise<void> {
 		const deletedData = await deleteOldCECData(timestampInPast, processingLimit);
 		logger.info(`Deleted one batch of ${deletedData.length} CEC data objects, preparing CDN removal`);
 
-		// TODO remove references to CEC datas that have been removed
-
-		// TODO CDN removal
+		await bulkDeleteCdnFiles('taskFile', deletedData.map(v => v.file_key));
+		logger.info(`CDN removal processed!`);
 
 		totalRemoved += deletedData.length;
 		hasDataToDelete = deletedData.length < processingLimit;
