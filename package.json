@@ -17,7 +17,6 @@
 		"@pretendonetwork/boss-crypto": "^1.0.0",
 		"@pretendonetwork/grpc": "^1.0.6",
 		"@typegoose/auto-increment": "^3.6.1",
-		"boss-js": "github:PretendoNetwork/boss-js",
 		"commander": "^14.0.0",
 		"cron": "^4.3.3",
 		"dicer": "^0.3.1",
@@ -30,6 +29,7 @@
 		"pino": "^9.9.1",
 		"pino-http": "^10.5.0",
 		"pino-pretty": "^13.1.1",
+		"undici": "^7.16.0",
 		"xml-js": "^1.6.11",
 		"xmlbuilder": "^15.1.1"
 	},

@@ -1,5 +1,9 @@
 import fs from 'node:fs/promises';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
+import { request } from 'undici';
 import { Command } from 'commander';
+import { decryptWiiU } from '@pretendonetwork/boss-crypto';
 import { getCliContext } from './utils';
 
 const listCmd = new Command('ls')
@@ -54,6 +58,51 @@ const viewCmd = new Command('view')
 		});
 	});
 
+const downloadCmd = new Command('download')
+	.description('Download a task file')
+	.argument('<app_id>', 'BOSS app that contains the task')
+	.argument('<task_id>', 'Task that contains the task file')
+	.argument('<id>', 'Task file ID to lookup', BigInt)
+	.option('-d, --decrypt', 'Decrypt the file before return')
+	.action(async (appId: string, taskId: string, dataId: bigint, ops: { decrypt: boolean }) => {
+		const ctx = getCliContext();
+		const { files } = await ctx.grpc.listFiles({
+			bossAppId: appId,
+			taskId: taskId
+		});
+		const file = files.find(v => v.dataId === dataId);
+		if (!file) {
+			console.error(`Could not find task file with data ID ${dataId} in task ${taskId}`);
+			process.exit(1);
+		}
+
+		const npdi = ctx.getNpdiUrl();
+		const { body, statusCode } = await request(`${npdi.url}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`, {
+			headers: {
+				Host: npdi.host
+			}
+		});
+		if (statusCode > 299) {
+			console.error(`Failed to download: invalid status code (${statusCode})`);
+			process.exit(1);
+		}
+
+		const chunks: Buffer[] = [];
+		for await (const chunk of body) {
+			chunks.push(Buffer.from(chunk));
+		}
+
+		let buffer: Buffer = Buffer.concat(chunks);
+
+		if (ops.decrypt) {
+			const keys = ctx.getWiiUKeys();
+			const decrypted = decryptWiiU(buffer, keys.aesKey, keys.hmacKey);
+			buffer = decrypted.content;
+		}
+
+		await pipeline(Readable.from(buffer), process.stdout);
+	});
+
 const createCmd = new Command('create')
 	.description('Create a new task file')
 	.argument('<app_id>', 'BOSS app to store the task file in')
@@ -103,4 +152,5 @@ export const fileCmd = new Command('file')
 	.addCommand(listCmd)
 	.addCommand(createCmd)
 	.addCommand(deleteCmd)
+	.addCommand(downloadCmd)
 	.addCommand(viewCmd);

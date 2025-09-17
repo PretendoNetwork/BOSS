@@ -46,3 +46,26 @@ Configurations are loaded through environment variables. `.env` files are suppor
  
 ## S3 server
 The S3 server is optional, you can set `PN_BOSS_CONFIG_CDN_DISK_PATH` if you want to use a local folder as CDN source instead.
+
+# BOSS CLI
+
+The CLI is a helper to interact with the content of the BOSS server.
+
+```sh
+npm run build
+./boss --help
+```
+
+## CLI configuration
+
+Configurations are loaded through environment variables. `.env` files are supported.
+
+| Environment variable        | Description                                                                                 |          |
+| --------------------------- | ------------------------------------------------------------------------------------------- | -------- |
+| `PN_BOSS_CLI_GRPC_HOST`     | The Host that the BOSS GRPC server is on. Example: `localhost:5678`                         | Required |
+| `PN_BOSS_CLI_GRPC_APIKEY`   | Master API key of the BOSS GRPC server.                                                     | Required |
+| `PN_BOSS_CLI_WIIU_AES_KEY`  | The BOSS WiiU AES key, needs to be dumped from a console                                    | Optional |
+| `PN_BOSS_CLI_WIIU_HMAC_KEY` | The BOSS WiiU HMAC key, needs to be dumped from a console                                   | Optional |
+| `PN_BOSS_CLI_NPDI_URL`      | The URL of the NPDI part the BOSS HTTP server, only needed when downloading                 | Optional |
+| `PN_BOSS_CLI_NPDI_HOST`     | The Host header for the NPDI requests. Use when you don't have NPDI exposed to the internet | Optional |
+ 
