@@ -16,11 +16,11 @@ async function runCleanSprData(): Promise<void> {
 		const deletedData = await deleteOldCECData(timestampInPast, processingLimit);
 		logger.info(`Deleted one batch of ${deletedData.length} CEC data objects, preparing CDN removal`);
 
-		await bulkDeleteCdnFiles('taskFile', deletedData.map(v => v.file_key));
+		await bulkDeleteCdnFiles('spr', deletedData.map(v => v.file_key));
 		logger.info(`CDN removal processed!`);
 
 		totalRemoved += deletedData.length;
-		hasDataToDelete = deletedData.length < processingLimit;
+		hasDataToDelete = deletedData.length === processingLimit;
 	}
 
 	logger.success(`Completed cleanup of ${totalRemoved}`);
