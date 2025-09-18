@@ -112,6 +112,9 @@ export async function deleteCDNFile(namespace: CDNNamespace, key: string): Promi
 }
 
 export async function bulkDeleteCdnFiles(namespace: CDNNamespace, keys: string[]): Promise<void> {
+	if (keys.length === 0) {
+		return;
+	}
 	if (keys.length > 1000) {
 		throw new Error('Cannot bulk delete more than 1000 CDN files in one batch');
 	}
