@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, unlink } from 'node:fs/promises';
 import { formidable } from 'formidable';
 import express from 'express';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
@@ -13,12 +13,12 @@ import { logger } from '@/logger';
 import { getCDNFileAsBuffer, uploadCDNFile } from '@/cdn';
 import RequestException from '@/request-exception';
 import type { File } from 'formidable';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
-async function parseMultipart(request: Request): Promise<Record<string, File>> {
+async function parseMultipart(request: Request, response: Response): Promise<Record<string, File>> {
 	const form = formidable({
 		multiples: false
 	});
@@ -27,12 +27,25 @@ async function parseMultipart(request: Request): Promise<Record<string, File>> {
 	});
 
 	const entries = Object.entries(parsedForm[1]);
-	const entriesWithSinglefile = entries.map(v => [v[0], (v[1] ?? [])[0]]);
-	return Object.fromEntries(entriesWithSinglefile);
+	const entriesWithSinglefile = entries.map(v => [v[0], (v[1] ?? [])[0]] as const);
+	const fileOutput = Object.fromEntries(entriesWithSinglefile);
+
+	const cleanup = async (): Promise<void> => {
+		await Promise.allSettled(
+			Object.values(fileOutput).map(file =>
+				unlink(file.filepath).catch(() => { /* Ignore cleanup errors */ })
+			)
+		);
+	};
+
+	response.once('finish', cleanup);
+	response.once('close', cleanup);
+
+	return fileOutput;
 }
 
 spr.post('/relay/0', async (request, response) => {
-	const files = await parseMultipart(request);
+	const files = await parseMultipart(request, response);
 
 	if (!request.pid || !request.nexAccount) {
 		response.sendStatus(401);
