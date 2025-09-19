@@ -4,32 +4,39 @@ import { Readable } from 'node:stream';
 import { request } from 'undici';
 import { Command } from 'commander';
 import { decryptWiiU } from '@pretendonetwork/boss-crypto';
-import { getCliContext } from './utils';
+import { commandHandler, getCliContext } from './utils';
+import { logOutputList, logOutputObject } from './output';
 
 const listCmd = new Command('ls')
 	.description('List all task files in BOSS')
 	.argument('<app_id>', 'BOSS app to search in')
 	.argument('<task_id>', 'Task to search in')
-	.action(async (appId: string, taskId: string) => {
+	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
+		const [appId, taskId] = cmd.args;
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFiles({
 			bossAppId: appId,
 			taskId: taskId
 		});
-		console.table(files.map(v => ({
-			'Data ID': Number(v.dataId),
-			'Name': v.name,
-			'Type': v.type,
-			'Size (bytes)': Number(v.size)
-		})));
-	});
+		logOutputList(cmd.format, files.map(v => ({
+			...v,
+			size: Number(v.size),
+			dataId: Number(v.dataId)
+		}), {
+			dataId: 'Data ID',
+			name: 'Name',
+			type: 'Type',
+			size: 'Size (bytes)'
+		}));
+	}));
 
 const viewCmd = new Command('view')
 	.description('Look up a specific task file')
 	.argument('<app_id>', 'BOSS app that contains the task')
 	.argument('<task_id>', 'Task that contains the task file')
 	.argument('<id>', 'Task file ID to lookup', BigInt)
-	.action(async (appId: string, taskId: string, dataId: bigint) => {
+	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
+		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFiles({
 			bossAppId: appId,
@@ -40,7 +47,7 @@ const viewCmd = new Command('view')
 			console.log(`Could not find task file with data ID ${dataId} in task ${taskId}`);
 			return;
 		}
-		console.log({
+		logOutputObject(cmd.format, {
 			dataId: Number(file.dataId),
 			name: file.name,
 			type: file.type,
@@ -56,7 +63,7 @@ const viewCmd = new Command('view')
 			createdAt: new Date(Number(file.createdTimestamp)),
 			updatedAt: new Date(Number(file.updatedTimestamp))
 		});
-	});
+	}));
 
 const downloadCmd = new Command('download')
 	.description('Download a task file')
@@ -64,7 +71,8 @@ const downloadCmd = new Command('download')
 	.argument('<task_id>', 'Task that contains the task file')
 	.argument('<id>', 'Task file ID to lookup', BigInt)
 	.option('-d, --decrypt', 'Decrypt the file before return')
-	.action(async (appId: string, taskId: string, dataId: bigint, ops: { decrypt: boolean }) => {
+	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
+		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFiles({
 			bossAppId: appId,
@@ -94,14 +102,14 @@ const downloadCmd = new Command('download')
 
 		let buffer: Buffer = Buffer.concat(chunks);
 
-		if (ops.decrypt) {
+		if (cmd.opts().decrypt) {
 			const keys = ctx.getWiiUKeys();
 			const decrypted = decryptWiiU(buffer, keys.aesKey, keys.hmacKey);
 			buffer = decrypted.content;
 		}
 
 		await pipeline(Readable.from(buffer), process.stdout);
-	});
+	}));
 
 const createCmd = new Command('create')
 	.description('Create a new task file')
@@ -115,7 +123,9 @@ const createCmd = new Command('create')
 	.option('--name-as-id', 'Force the name as the data ID')
 	.option('--notify-new <type...>', 'Add entry to NotifyNew')
 	.option('--notify-led', 'Enable NotifyLED')
-	.action(async (appId: string, taskId: string, opts: { name: string; country: string[]; notifyNew: string[]; notifyLed: boolean; lang: string[]; nameAsId?: boolean; type: string; file: string }) => {
+	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
+		const [appId, taskId] = cmd.args;
+		const opts = cmd.opts<{ name: string; country: string[]; notifyNew: string[]; notifyLed: boolean; lang: string[]; nameAsId?: boolean; type: string; file: string }>();
 		const fileBuf = await fs.readFile(opts.file);
 		const ctx = getCliContext();
 		const { file } = await ctx.grpc.uploadFile({
@@ -135,21 +145,23 @@ const createCmd = new Command('create')
 			return;
 		}
 		console.log(`Created file with ID ${file.dataId}`);
-	});
+	}));
 
 const deleteCmd = new Command('delete')
 	.description('Delete a task file')
 	.argument('<app_id>', 'BOSS app that contains the task')
 	.argument('<task_id>', 'Task that contains the task file')
 	.argument('<id>', 'Task file ID to delete', BigInt)
-	.action(async (appId: string, taskId: string, dataId: bigint) => {
+	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- I want to use destructuring
+		const [appId, _taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
 		await ctx.grpc.deleteFile({
 			bossAppId: appId,
 			dataId: dataId
 		});
 		console.log(`Deleted task file with ID ${dataId}`);
-	});
+	}));
 
 export const fileCmd = new Command('file')
 	.description('Manage all the task files in BOSS')

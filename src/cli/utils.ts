@@ -2,6 +2,8 @@ import { BOSSDefinition } from '@pretendonetwork/grpc/boss/boss_service';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import dotenv from 'dotenv';
 import type { BOSSClient } from '@pretendonetwork/grpc/boss/boss_service';
+import type { Command } from 'commander';
+import type { FormatOption } from './output';
 
 export type WiiUKeys = { aesKey: string; hmacKey: string };
 export type NpdiUrl = {
@@ -70,4 +72,34 @@ export function prettyTrunc(str: string, len: number): string {
 		return `${str.slice(0, len)}...`;
 	}
 	return str;
+}
+
+export type CommandHandlerCtx<T extends any[]> = {
+	opts: <T = Record<string, any>>() => T;
+	globalOpts: {
+		json?: boolean;
+	};
+	format: FormatOption;
+	args: T;
+};
+
+export function commandHandler<T extends any[]>(cb: (ctx: CommandHandlerCtx<T>) => Promise<void>) {
+	return (...args: any[]): Promise<void> => {
+		const cmd: Command = args[args.length - 1];
+
+		let topCmd = cmd;
+		while (topCmd.parent) {
+			topCmd = topCmd.parent;
+		}
+		const globalOpts = topCmd.opts() ?? {};
+
+		const ctx: CommandHandlerCtx<T> = {
+			args: args as T,
+			globalOpts,
+			format: globalOpts.json ? 'json' : 'pretty',
+			opts: () => cmd.opts() as any
+		};
+		console.log(globalOpts);
+		return cb(ctx);
+	};
 }
