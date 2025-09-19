@@ -7,6 +7,7 @@ import { importCmd } from './import.cmd';
 const program = baseProgram
 	.name('BOSS')
 	.description('CLI to manage and view BOSS data')
+	.option('--json', 'Output as JSON')
 	.addCommand(appCmd)
 	.addCommand(taskCmd)
 	.addCommand(importCmd)
