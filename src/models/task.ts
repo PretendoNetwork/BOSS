@@ -13,7 +13,7 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 	status: {
 		type: String,
 		required: true,
-		enum: ['open', 'closed']
+		enum: ['open', 'close']
 	},
 	title_id: String,
 	description: String,
