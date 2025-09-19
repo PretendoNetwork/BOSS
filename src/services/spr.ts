@@ -1,87 +1,23 @@
 import crypto from 'node:crypto';
-import { Stream } from 'node:stream';
+import { readFile } from 'node:fs/promises';
 import express from 'express';
-import Dicer from 'dicer';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends } from '@/util';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { SendMode } from '@/types/common/spr-slot';
-import RequestException from '@/request-exception';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { logger } from '@/logger';
 import { getCDNFileAsBuffer, uploadCDNFile } from '@/cdn';
+import { parseMultipart } from '@/middleware/multipart';
+import type { File } from 'formidable';
 import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
-function multipartParser(request: express.Request, response: express.Response, next: express.NextFunction): void {
-	const RE_BOUNDARY = /^multipart\/.+?(?:; boundary=(?:(?:"(.+)")|(?:([^\s]+))))$/i;
-	const RE_FILE_NAME = /name="(.*)"/;
-
-	const contentType = request.header('content-type');
-
-	if (!contentType) {
-		return next();
-	}
-
-	const boundary = RE_BOUNDARY.exec(contentType);
-
-	if (!boundary) {
-		return next();
-	}
-
-	const dicer = new Dicer({ boundary: boundary[1] || boundary[2] });
-	const files: Record<string, Buffer> = {};
-
-	dicer.on('part', (part: Dicer.PartStream) => {
-		let fileBuffer = Buffer.alloc(0);
-		let fileName = '';
-
-		part.on('header', (header) => {
-			const contentDisposition = header['content-disposition' as keyof object];
-			const regexResult = RE_FILE_NAME.exec(contentDisposition);
-
-			if (regexResult) {
-				fileName = regexResult[1];
-			}
-		});
-
-		part.on('data', (data: Buffer | string) => {
-			if (typeof data === 'string') {
-				data = Buffer.from(data);
-			}
-
-			fileBuffer = Buffer.concat([fileBuffer, data]);
-		});
-
-		part.on('end', () => {
-			files[fileName] = fileBuffer;
-		});
-
-		part.on('error', (error: Error) => {
-			return next(new RequestException(error.message, 400));
-		});
-	});
-
-	dicer.on('finish', function () {
-		request.files = files;
-		return next();
-	});
-
-	Stream.pipeline(request, dicer, (error: Error | null) => {
-		if (error) {
-			return next(new RequestException(error.message, 400));
-		}
-	});
-}
-
-spr.post('/relay/0', multipartParser, async (request, response) => {
-	if (!request.files) {
-		response.sendStatus(400);
-		return;
-	}
+spr.post('/relay/0', async (request, response) => {
+	const { files, fields } = await parseMultipart(request, response);
 
 	if (!request.pid || !request.nexAccount) {
 		response.sendStatus(401);
@@ -90,15 +26,15 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 
 	// * Check that the account is a 3DS and isn't banned
 	if (!request.nexAccount.friendCode || request.nexAccount.accessLevel < 0) {
-		logger.info(`{request.pid}: User is not a 3DS or is banned`);
+		logger.info(`${request.pid}: User is not a 3DS or is banned`);
 		response.sendStatus(403);
 		return;
 	}
 
-	const sprMetadataBuffer: Buffer | undefined = request.files['spr-meta'];
+	const sprMetadata: string | undefined = fields['spr-meta'];
 
-	if (!sprMetadataBuffer) {
-		logger.warn(`{request.pid}: Missing spr-meta file`);
+	if (!sprMetadata) {
+		logger.warn(`${request.pid}: Missing spr-meta file`);
 		response.sendStatus(400);
 		return;
 	}
@@ -106,7 +42,6 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 	const sprSlots: SPRSlot[] = [];
 
 	// * Check spr-meta metadata headers
-	const sprMetadata = sprMetadataBuffer.toString();
 	const metadataHeaders = sprMetadata.split('\r\n'); // * Split header lines
 
 	if (metadataHeaders.length < 1) {
@@ -177,15 +112,15 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 		let data: Buffer = Buffer.alloc(0);
 		if (size > 0 && sendMode !== SendMode.RecvOnly) {
 			const slot = i.toString().padStart(2, '0');
-			const slotData: Buffer | undefined = request.files['spr-slot' + slot];
+			const slotDataFile: File | undefined = files['spr-slot' + slot];
 
-			if (!slotData) {
+			if (!slotDataFile) {
 				logger.warn(`${request.pid}: Missing slot data file`);
 				response.sendStatus(400);
 				return;
 			}
 
-			if (slotData.length !== size) {
+			if (slotDataFile.size !== size) {
 				logger.warn(`${request.pid}: Invalid slot data size`);
 				response.sendStatus(400);
 				return;
@@ -200,12 +135,13 @@ spr.post('/relay/0', multipartParser, async (request, response) => {
 			// * This is then followed by a CecMessageHeader (see https://github.com/NarcolepticK/CECDocs/blob/master/Structs/CecMessageHeader.md)
 
 			// * Check that we at least have enough size for the StreetPass header
-			if (slotData.length < 0x12) {
+			if (slotDataFile.size < 0x12) {
 				logger.warn(`${request.pid}: Slot is too short`);
 				response.sendStatus(400);
 				return;
 			}
 
+			const slotData = await readFile(slotDataFile.filepath);
 			if (slotData.readUInt32LE() !== 0x6161) {
 				logger.warn(`${request.pid}: Slot header missmatch`);
 				response.sendStatus(400);
