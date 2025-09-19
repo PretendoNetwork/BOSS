@@ -20,8 +20,8 @@ const listCmd = new Command('ls')
 		});
 		logOutputList(cmd.format, files.map(v => ({
 			...v,
-			size: Number(v.size),
-			dataId: Number(v.dataId)
+			size: v.size,
+			dataId: v.dataId
 		}), {
 			dataId: 'Data ID',
 			name: 'Name',
@@ -48,10 +48,10 @@ const viewCmd = new Command('view')
 			return;
 		}
 		logOutputObject(cmd.format, {
-			dataId: Number(file.dataId),
+			dataId: file.dataId,
 			name: file.name,
 			type: file.type,
-			size: Number(file.size),
+			size: file.size,
 			hash: file.hash,
 			supportedCountries: file.supportedCountries,
 			supportedLanguages: file.supportedLanguages,

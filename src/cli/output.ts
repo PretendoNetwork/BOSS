@@ -11,14 +11,16 @@ function mapOutputObject(obj: FormattableObject, mapping: FieldMapping): Formatt
 	return Object.fromEntries(mappedEntries);
 }
 
+function jsonReplacer(key: string, value: any): any {
+	if (typeof value === 'bigint') {
+		return Number(value);
+	}
+	return value;
+}
+
 export function logOutputList<T extends FormattableObject>(format: FormatOption, items: T[], mapping: FieldMapping = {}): void {
 	if (format === 'json') {
-		console.log(JSON.stringify(items, (_, v) => {
-			if (typeof v === 'bigint') {
-				return v.toString();
-			}
-			return v;
-		}, 2));
+		console.log(JSON.stringify(items, jsonReplacer, 2));
 		return;
 	}
 	const mappedItems = items.map(item => mapOutputObject(item, mapping));
@@ -27,7 +29,7 @@ export function logOutputList<T extends FormattableObject>(format: FormatOption,
 
 export function logOutputObject<T extends FormattableObject>(format: FormatOption, obj: T, mapping: FieldMapping = {}): void {
 	if (format === 'json') {
-		console.log(JSON.stringify(obj, null, 2));
+		console.log(JSON.stringify(obj, jsonReplacer, 2));
 		return;
 	}
 	console.log(mapOutputObject(obj, mapping));
