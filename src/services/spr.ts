@@ -1,6 +1,5 @@
 import crypto from 'node:crypto';
-import { readFile, unlink } from 'node:fs/promises';
-import { formidable } from 'formidable';
+import { readFile } from 'node:fs/promises';
 import express from 'express';
 import { getDuplicateCECData, getRandomCECData } from '@/database';
 import { getFriends } from '@/util';
@@ -11,41 +10,14 @@ import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { logger } from '@/logger';
 import { getCDNFileAsBuffer, uploadCDNFile } from '@/cdn';
-import RequestException from '@/request-exception';
+import { parseMultipart } from '@/middleware/multipart';
 import type { File } from 'formidable';
-import type { Request, Response } from 'express';
 import type { SPRSlot } from '@/types/common/spr-slot';
 
 const spr = express.Router();
 
-async function parseMultipart(request: Request, response: Response): Promise<Record<string, File>> {
-	const form = formidable({
-		multiples: false
-	});
-	const parsedForm = await form.parse(request).catch((err: Error) => {
-		throw new RequestException(err.message, 400);
-	});
-
-	const entries = Object.entries(parsedForm[1]);
-	const entriesWithSinglefile = entries.map(v => [v[0], (v[1] ?? [])[0]] as const);
-	const fileOutput = Object.fromEntries(entriesWithSinglefile);
-
-	const cleanup = async (): Promise<void> => {
-		await Promise.allSettled(
-			Object.values(fileOutput).map(file =>
-				unlink(file.filepath).catch(() => { /* Ignore cleanup errors */ })
-			)
-		);
-	};
-
-	response.once('finish', cleanup);
-	response.once('close', cleanup);
-
-	return fileOutput;
-}
-
 spr.post('/relay/0', async (request, response) => {
-	const files = await parseMultipart(request, response);
+	const { files, fields } = await parseMultipart(request, response);
 
 	if (!request.pid || !request.nexAccount) {
 		response.sendStatus(401);
@@ -59,9 +31,9 @@ spr.post('/relay/0', async (request, response) => {
 		return;
 	}
 
-	const sprMetadataFile: File | undefined = files['spr-meta'];
+	const sprMetadata: string | undefined = fields['spr-meta'];
 
-	if (!sprMetadataFile) {
+	if (!sprMetadata) {
 		logger.warn(`${request.pid}: Missing spr-meta file`);
 		response.sendStatus(400);
 		return;
@@ -70,7 +42,6 @@ spr.post('/relay/0', async (request, response) => {
 	const sprSlots: SPRSlot[] = [];
 
 	// * Check spr-meta metadata headers
-	const sprMetadata = await readFile(sprMetadataFile.filepath, 'utf-8');
 	const metadataHeaders = sprMetadata.split('\r\n'); // * Split header lines
 
 	if (metadataHeaders.length < 1) {
