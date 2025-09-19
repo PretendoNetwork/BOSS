@@ -2,7 +2,7 @@ import path from 'node:path';
 import { Stream } from 'node:stream';
 import { buffer as bufferConsumer } from 'node:stream/consumers';
 import fs from 'fs-extra';
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { config, disabledFeatures } from '@/config-manager';
 import { fileStatOrNull } from './util';
 import { logger } from './logger';
@@ -113,6 +113,29 @@ export async function deleteCDNFile(namespace: CDNNamespace, key: string): Promi
 
 	await s3.send(new DeleteObjectCommand({
 		Key: fullKey,
+		Bucket: config.cdn.s3.bucket
+	}));
+}
+
+export async function bulkDeleteCdnFiles(namespace: CDNNamespace, keys: string[]): Promise<void> {
+	if (keys.length === 0) {
+		return;
+	}
+	if (keys.length > 1000) {
+		throw new Error('Cannot bulk delete more than 1000 CDN files in one batch');
+	}
+
+	if (!s3) {
+		await Promise.allSettled(keys.map(v => deleteCDNFile(namespace, v)));
+		return;
+	}
+
+	const fullKeys = keys.map(v => buildKey(namespace, v));
+	await s3.send(new DeleteObjectsCommand({
+		Delete: {
+			Objects: fullKeys.map(v => ({ Key: v })),
+			Quiet: true
+		},
 		Bucket: config.cdn.s3.bucket
 	}));
 }

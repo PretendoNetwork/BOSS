@@ -12,6 +12,7 @@ import npdi from '@/services/npdi';
 import npfl from '@/services/npfl';
 import npdl from '@/services/npdl';
 import spr from '@/services/spr';
+import { setupScheduler } from './scheduled';
 
 process.title = 'Pretendo - BOSS';
 process.on('SIGTERM', () => {
@@ -72,6 +73,9 @@ async function main(): Promise<void> {
 
 	await connectDatabase();
 	logger.success('Database connected');
+
+	await setupScheduler();
+	logger.success('Scheduler started');
 
 	await startGRPCServer();
 	logger.success(`gRPC server started at address ${config.grpc.boss.address}:${config.grpc.boss.port}`);

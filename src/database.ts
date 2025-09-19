@@ -216,3 +216,30 @@ export async function getRandomCECData(pids: number[], gameID: number): Promise<
 
 	return null;
 }
+
+export async function deleteOldCECData(olderThan: Date, limit: number): Promise<{ id: string; file_key: string }[]> {
+	verifyConnected();
+
+	const toDelete = await CECData.find({
+		created: {
+			$lt: olderThan.getTime()
+		}
+	}).limit(limit).sort({ created: 1 }).select({ file_key: 1 });
+	const ids = toDelete.map(v => v.id);
+
+	await CECData.deleteMany({
+		_id: {
+			$in: ids
+		}
+	});
+
+	// Remove slot if their newest data is what we've just deleted
+	// This is safe because everything older than the deleted data is also gone
+	await CECSlot.deleteMany({
+		latest_data_id: {
+			$in: ids
+		}
+	});
+
+	return toDelete.map(v => ({ id: v.id, file_key: v.file_key }));
+}
