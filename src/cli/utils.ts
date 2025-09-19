@@ -99,7 +99,7 @@ export function commandHandler<T extends any[]>(cb: (ctx: CommandHandlerCtx<T>) 
 			format: globalOpts.json ? 'json' : 'pretty',
 			opts: () => cmd.opts() as any
 		};
-		console.log(globalOpts);
+
 		return cb(ctx);
 	};
 }
