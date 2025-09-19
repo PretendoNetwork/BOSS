@@ -18,6 +18,7 @@
 		"@pretendonetwork/grpc": "^1.0.6",
 		"@typegoose/auto-increment": "^4.13.0",
 		"commander": "^14.0.0",
+		"cron": "^4.3.3",
 		"dotenv": "^16.4.7",
 		"express": "^5.1.0",
 		"formidable": "^3.5.4",
