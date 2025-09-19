@@ -13,7 +13,12 @@ function mapOutputObject(obj: FormattableObject, mapping: FieldMapping): Formatt
 
 export function logOutputList<T extends FormattableObject>(format: FormatOption, items: T[], mapping: FieldMapping = {}): void {
 	if (format === 'json') {
-		console.log(JSON.stringify(items, null, 2));
+		console.log(JSON.stringify(items, (_, v) => {
+			if (typeof v === 'bigint') {
+				return v.toString();
+			}
+			return v;
+		}, 2));
 		return;
 	}
 	const mappedItems = items.map(item => mapOutputObject(item, mapping));
