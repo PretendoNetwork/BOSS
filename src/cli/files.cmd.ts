@@ -113,7 +113,9 @@ const createCmd = new Command('create')
 	.option('--country <country...>', 'Countries for this task file')
 	.option('--lang <language...>', 'Languages for this task file')
 	.option('--name-as-id', 'Force the name as the data ID')
-	.action(async (appId: string, taskId: string, opts: { name: string; country: string[]; lang: string[]; nameAsId?: boolean; type: string; file: string }) => {
+	.option('--notify-new <type...>', 'Add entry to NotifyNew')
+	.option('--notify-led', 'Enable NotifyLED')
+	.action(async (appId: string, taskId: string, opts: { name: string; country: string[]; notifyNew: string[]; notifyLed: boolean; lang: string[]; nameAsId?: boolean; type: string; file: string }) => {
 		const fileBuf = await fs.readFile(opts.file);
 		const ctx = getCliContext();
 		const { file } = await ctx.grpc.uploadFile({
@@ -124,7 +126,9 @@ const createCmd = new Command('create')
 			supportedLanguages: opts.lang,
 			type: opts.type,
 			nameEqualsDataId: opts.nameAsId ?? false,
-			data: fileBuf
+			data: fileBuf,
+			notifyOnNew: opts.notifyNew,
+			notifyLed: opts.notifyLed
 		});
 		if (!file) {
 			console.log(`Failed to create file!`);
