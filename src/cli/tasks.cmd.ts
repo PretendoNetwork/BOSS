@@ -10,10 +10,14 @@ const listCmd = new Command('ls')
 		const ctx = getCliContext();
 		const { tasks } = await ctx.grpc.listTasks({});
 		const filteredTasks = tasks.filter(v => v.bossAppId === appId);
-		logOutputList(cmd.format, filteredTasks, {
-			id: 'Task ID',
-			description: 'Description',
-			status: 'Status'
+		logOutputList(filteredTasks, {
+			format: cmd.format,
+			mapping: {
+				id: 'Task ID',
+				description: 'Description',
+				status: 'Status'
+			},
+			onlyIncludeKeys: ['id', 'description', 'status']
 		});
 	}));
 
@@ -30,7 +34,7 @@ const viewCmd = new Command('view')
 			console.log(`Could not find task with ID ${taskId} in app ${appId}`);
 			return;
 		}
-		logOutputObject(cmd.format, {
+		logOutputObject({
 			taskId: task.id,
 			inGameId: task.inGameId,
 			description: task.description,
@@ -40,6 +44,8 @@ const viewCmd = new Command('view')
 			status: task.status,
 			createdAt: new Date(Number(task.createdTimestamp)),
 			updatedAt: new Date(Number(task.updatedTimestamp))
+		}, {
+			format: cmd.format
 		});
 	}));
 

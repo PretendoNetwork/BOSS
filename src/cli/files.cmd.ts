@@ -18,16 +18,16 @@ const listCmd = new Command('ls')
 			bossAppId: appId,
 			taskId: taskId
 		});
-		logOutputList(cmd.format, files.map(v => ({
-			...v,
-			size: v.size,
-			dataId: v.dataId
-		}), {
-			dataId: 'Data ID',
-			name: 'Name',
-			type: 'Type',
-			size: 'Size (bytes)'
-		}));
+		logOutputList(files, {
+			format: cmd.format,
+			onlyIncludeKeys: ['dataId', 'name', 'type', 'size'],
+			mapping: {
+				dataId: 'Data ID',
+				name: 'Name',
+				type: 'Type',
+				size: 'Size (bytes)'
+			}
+		});
 	}));
 
 const viewCmd = new Command('view')
@@ -47,7 +47,7 @@ const viewCmd = new Command('view')
 			console.log(`Could not find task file with data ID ${dataId} in task ${taskId}`);
 			return;
 		}
-		logOutputObject(cmd.format, {
+		logOutputObject({
 			dataId: file.dataId,
 			name: file.name,
 			type: file.type,
@@ -62,6 +62,8 @@ const viewCmd = new Command('view')
 			},
 			createdAt: new Date(Number(file.createdTimestamp)),
 			updatedAt: new Date(Number(file.updatedTimestamp))
+		}, {
+			format: cmd.format
 		});
 	}));
 

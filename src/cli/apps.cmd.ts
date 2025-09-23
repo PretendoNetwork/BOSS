@@ -7,13 +7,21 @@ const listCmd = new Command('ls')
 	.action(commandHandler<[]>(async (cmd): Promise<void> => {
 		const ctx = getCliContext();
 		const { apps } = await ctx.grpc.listKnownBOSSApps({});
-		logOutputList(cmd.format, apps.map(v => ({
-			name: prettyTrunc(v.name, 20)
-		})), {
-			bossAppId: 'App ID',
-			name: 'Name',
-			titleId: 'Title ID',
-			titleRegion: 'Title region'
+		logOutputList(apps, {
+			format: cmd.format,
+			onlyIncludeKeys: ['bossAppId', 'name', 'tasks', 'titleRegion'],
+			mapping: {
+				bossAppId: 'App ID',
+				name: 'Name',
+				titleId: 'Title ID',
+				titleRegion: 'Title region'
+			},
+			prettify(key, value) {
+				if (key === 'name') {
+					return prettyTrunc(value, 20);
+				}
+				return value;
+			}
 		});
 	}));
 
@@ -30,12 +38,15 @@ const viewCmd = new Command('view')
 			return;
 		}
 
-		logOutputObject(cmd.format, {
+		const obj = {
 			appId: app.bossAppId,
 			name: app.name,
 			titleId: app.titleId,
 			titleRegion: app.titleRegion,
 			knownTasks: app.tasks
+		};
+		logOutputObject(obj, {
+			format: cmd.format
 		});
 	}));
 
