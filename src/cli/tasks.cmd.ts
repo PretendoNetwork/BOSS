@@ -1,25 +1,32 @@
 import { Command } from 'commander';
-import { getCliContext } from './utils';
+import { commandHandler, getCliContext } from './utils';
+import { logOutputList, logOutputObject } from './output';
 
 const listCmd = new Command('ls')
 	.description('List all tasks in BOSS')
 	.argument('<app_id>', 'BOSS app to search in')
-	.action(async (appId: string) => {
+	.action(commandHandler<[string]>(async (cmd): Promise<void> => {
+		const [appId] = cmd.args;
 		const ctx = getCliContext();
 		const { tasks } = await ctx.grpc.listTasks({});
 		const filteredTasks = tasks.filter(v => v.bossAppId === appId);
-		console.table(filteredTasks.map(v => ({
-			'Task ID': v.id,
-			'Description': v.description,
-			'Status': v.status
-		})));
-	});
+		logOutputList(filteredTasks, {
+			format: cmd.format,
+			mapping: {
+				id: 'Task ID',
+				description: 'Description',
+				status: 'Status'
+			},
+			onlyIncludeKeys: ['id', 'description', 'status']
+		});
+	}));
 
 const viewCmd = new Command('view')
 	.description('Look up a specific task')
 	.argument('<app_id>', 'BOSS app ID that contains the task')
 	.argument('<id>', 'Task ID to lookup')
-	.action(async (appId: string, taskId: string) => {
+	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
+		const [appId, taskId] = cmd.args;
 		const ctx = getCliContext();
 		const { tasks } = await ctx.grpc.listTasks({});
 		const task = tasks.find(v => v.bossAppId === appId && v.id === taskId);
@@ -27,7 +34,7 @@ const viewCmd = new Command('view')
 			console.log(`Could not find task with ID ${taskId} in app ${appId}`);
 			return;
 		}
-		console.log({
+		logOutputObject({
 			taskId: task.id,
 			inGameId: task.inGameId,
 			description: task.description,
@@ -37,8 +44,10 @@ const viewCmd = new Command('view')
 			status: task.status,
 			createdAt: new Date(Number(task.createdTimestamp)),
 			updatedAt: new Date(Number(task.updatedTimestamp))
+		}, {
+			format: cmd.format
 		});
-	});
+	}));
 
 const createCmd = new Command('create')
 	.description('Create a new task')
@@ -46,8 +55,10 @@ const createCmd = new Command('create')
 	.requiredOption('--id <id>', 'Id of the task')
 	.requiredOption('--title-id <titleId>', 'Title ID for the task')
 	.option('--desc [desc]', 'Description of the task')
-	.action(async (appId: string, opts: { id: string; titleId: string; desc?: string }) => {
+	.action(commandHandler<[string]>(async (cmd): Promise<void> => {
+		const [appId] = cmd.args;
 		const ctx = getCliContext();
+		const opts = cmd.opts<{ id: string; titleId: string; desc?: string }>();
 		const { task } = await ctx.grpc.registerTask({
 			bossAppId: appId,
 			id: opts.id,
@@ -60,20 +71,21 @@ const createCmd = new Command('create')
 			return;
 		}
 		console.log(`Created task with ID ${task.id}`);
-	});
+	}));
 
 const deleteCmd = new Command('delete')
 	.description('Delete a task')
 	.argument('<app_id>', 'BOSS app ID that contains the task')
 	.argument('<id>', 'Task ID to delete')
-	.action(async (appId: string, taskId: string) => {
+	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
+		const [appId, taskId] = cmd.args;
 		const ctx = getCliContext();
 		await ctx.grpc.deleteTask({
 			bossAppId: appId,
 			id: taskId
 		});
 		console.log(`Deleted task with ID ${taskId}`);
-	});
+	}));
 
 export const taskCmd = new Command('task')
 	.description('Manage all the tasks in BOSS')
