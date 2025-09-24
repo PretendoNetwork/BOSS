@@ -9,7 +9,7 @@ const listCmd = new Command('ls')
 		const { apps } = await ctx.grpc.listKnownBOSSApps({});
 		logOutputList(apps, {
 			format: cmd.format,
-			onlyIncludeKeys: ['bossAppId', 'name', 'tasks', 'titleRegion'],
+			onlyIncludeKeys: ['bossAppId', 'name', 'titleId', 'titleRegion'],
 			mapping: {
 				bossAppId: 'App ID',
 				name: 'Name',
