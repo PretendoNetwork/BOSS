@@ -181,7 +181,7 @@ spr.post('/relay/0', async (request, response) => {
 
 			// * Upload slot data
 			if (sprSlot.size > 0 && sprSlot.sendMode !== SendMode.RecvOnly) {
-				const dataHash = crypto.createHash('sha256').update(sprSlot.data).digest('base64');
+				const dataHash = crypto.createHash('sha256').update(sprSlot.data).digest('hex');
 				let slotData = await getDuplicateCECData(request.pid, sprSlot.gameID);
 
 				if (!slotData || slotData.data_hash !== dataHash) {
