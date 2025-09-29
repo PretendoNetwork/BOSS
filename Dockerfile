@@ -8,6 +8,7 @@ FROM node:20-alpine AS base
 ARG app_dir
 WORKDIR ${app_dir}
 
+RUN apk update && apk add libc6-compat
 
 # * Installing production dependencies
 FROM base AS dependencies
