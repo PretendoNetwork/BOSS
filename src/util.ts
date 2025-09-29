@@ -10,7 +10,7 @@ import type { AccountClient } from '@pretendonetwork/grpc/account/account_servic
 import type { GetNEXDataResponse } from '@pretendonetwork/grpc/account/get_nex_data_rpc';
 import type { GetUserDataResponse } from '@pretendonetwork/grpc/account/get_user_data_rpc';
 import type { GetUserFriendPIDsResponse } from '@pretendonetwork/grpc/friends/get_user_friend_pids_rpc';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import type { Stats } from 'node:fs';
 
 const gRPCAccountChannel = createChannel(`${config.grpc.account.address}:${config.grpc.account.port}`);
@@ -147,4 +147,17 @@ export async function getFriends(pid: number): Promise<GetUserFriendPIDsResponse
 		// TODO - Handle error
 		return null;
 	}
+}
+
+export function handleEtag(request: Request, response: Response, hash: string): { clientHasCached: boolean } {
+	const etag = `"${hash}"`;
+	response.setHeader('ETag', etag);
+	if (request.headers['if-none-match'] === etag) {
+		return { clientHasCached: true };
+	}
+	return { clientHasCached: false };
+}
+
+export function sendEtagCacheResponse(response: Response): void {
+	response.sendStatus(304).end();
 }
