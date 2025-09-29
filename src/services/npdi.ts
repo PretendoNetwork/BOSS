@@ -3,6 +3,7 @@ import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
 import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
 import { getTaskFileByDataID } from '@/database';
+import { handleEtag, sendEtagCacheResponse } from '@/util';
 
 const npdi = express.Router();
 
@@ -16,6 +17,11 @@ npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) =
 
 	if (file.hash !== fileHash || file.boss_app_id !== bossAppId) {
 		return response.sendStatus(404);
+	}
+
+	const { clientHasCached } = handleEtag(request, response, file.hash);
+	if (clientHasCached) {
+		return sendEtagCacheResponse(response);
 	}
 
 	const fileStream = await getCDNFileAsStream('taskFile', file.file_key);

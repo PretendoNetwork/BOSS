@@ -3,6 +3,7 @@ import { getTaskFile } from '@/database';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
+import { handleEtag, sendEtagCacheResponse } from '@/util';
 
 const npdl = express.Router();
 
@@ -27,6 +28,11 @@ npdl.get([
 	if (!file) {
 		response.sendStatus(404);
 		return;
+	}
+
+	const { clientHasCached } = handleEtag(request, response, file.hash);
+	if (clientHasCached) {
+		return sendEtagCacheResponse(response);
 	}
 
 	const readStream = await getCDNFileAsStream('taskFile', file.file_key);
