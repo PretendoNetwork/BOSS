@@ -62,7 +62,7 @@ const createCmd = new Command('create')
 		const { task } = await ctx.grpc.registerTask({
 			bossAppId: appId,
 			id: opts.id,
-			titleId: opts.titleId,
+			titleId: BigInt(parseInt(opts.titleId, 16)),
 			description: opts.desc ?? '',
 			country: 'This value isnt used'
 		});
