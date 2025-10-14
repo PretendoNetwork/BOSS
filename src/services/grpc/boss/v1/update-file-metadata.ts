@@ -1,11 +1,11 @@
 import { Status, ServerError } from 'nice-grpc';
 import { getTaskFileByDataID } from '@/database';
 import { isValidFileNotifyCondition, isValidFileType } from '@/util';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { UpdateFileMetadataRequest } from '@pretendonetwork/grpc/boss/update_file_metadata';
-import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
+import type { Empty } from '@pretendonetwork/grpc/google/protobuf/empty';
 
 export async function updateFileMetadata(request: UpdateFileMetadataRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
 	if (!hasPermission(context, 'updateBossFiles')) {

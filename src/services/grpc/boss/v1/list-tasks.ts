@@ -12,7 +12,7 @@ export async function listTasks(): Promise<ListTasksResponse> {
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,
-			titleId: task.title_id,
+			titleId: BigInt(parseInt(task.title_id, 16)),
 			description: task.description,
 			createdTimestamp: task.created,
 			updatedTimestamp: task.updated

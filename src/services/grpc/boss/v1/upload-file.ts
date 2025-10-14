@@ -5,8 +5,8 @@ import { getTask, getTaskFile } from '@/database';
 import { File } from '@/models/file';
 import { config } from '@/config-manager';
 import { uploadCDNFile } from '@/cdn';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
 

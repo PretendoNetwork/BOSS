@@ -1,8 +1,8 @@
 import { ServerError, Status } from 'nice-grpc';
 import { getTask } from '@/database';
 import { Task } from '@/models/task';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
 
@@ -15,7 +15,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 
 	const taskID = request.id.trim();
 	const bossAppID = request.bossAppId.trim();
-	const titleID = request.titleId.trim().toLocaleLowerCase();
+	const titleID = request.titleId.toString(16).toLowerCase().padStart(16, '0');
 	const description = request.description.trim();
 
 	if (!taskID) {
@@ -68,7 +68,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,
-			titleId: task.title_id,
+			titleId: BigInt(parseInt(task.title_id, 16)),
 			description: task.description,
 			createdTimestamp: task.created,
 			updatedTimestamp: task.updated
