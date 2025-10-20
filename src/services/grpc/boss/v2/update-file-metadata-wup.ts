@@ -1,5 +1,5 @@
 import { Status, ServerError } from 'nice-grpc';
-import { getTaskFileByDataID } from '@/database';
+import { getWUPTaskFileByDataID } from '@/database';
 import { isValidFileNotifyCondition, isValidFileType } from '@/util';
 import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
@@ -23,7 +23,7 @@ export async function updateFileMetadataWUP(request: UpdateFileMetadataWUPReques
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing file update data');
 	}
 
-	const file = await getTaskFileByDataID(dataID);
+	const file = await getWUPTaskFileByDataID(dataID);
 
 	if (!file || file.deleted) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `File ${dataID} not found`);
@@ -51,6 +51,8 @@ export async function updateFileMetadataWUP(request: UpdateFileMetadataWUPReques
 	file.type = updateData.type;
 	file.notify_on_new = updateData.notifyOnNew;
 	file.notify_led = updateData.notifyLed;
+	file.condition_played = updateData.conditionPlayed;
+	file.auto_delete = updateData.autoDelete;
 	file.updated = BigInt(Date.now());
 
 	await file.save();

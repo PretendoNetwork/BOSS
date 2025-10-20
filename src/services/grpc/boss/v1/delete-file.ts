@@ -1,5 +1,5 @@
 import { Status, ServerError } from 'nice-grpc';
-import { getTaskFileByDataID } from '@/database';
+import { getWUPTaskFileByDataID } from '@/database';
 import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
@@ -18,7 +18,7 @@ export async function deleteFile(request: DeleteFileRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing file data ID');
 	}
 
-	const file = await getTaskFileByDataID(dataID);
+	const file = await getWUPTaskFileByDataID(dataID);
 
 	if (!file || file.boss_app_id !== bossAppID) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `File ${dataID} not found for BOSS app ${bossAppID}`);

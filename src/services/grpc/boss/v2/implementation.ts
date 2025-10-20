@@ -7,8 +7,8 @@ import { deleteFile } from '@/services/grpc/boss/v2/delete-file';
 import { listFilesWUP } from '@/services/grpc/boss/v2/list-files-wup';
 import { uploadFileWUP } from '@/services/grpc/boss/v2/upload-file-wup';
 import { listFilesCTR } from '@/services/grpc/boss/v2/list-files-ctr';
-// import { uploadFileCTR } from '@/services/grpc/boss/v2/upload-file-ctr';
-// import { updateFileMetadataCTR } from '@/services/grpc/boss/v2/update-file-metadata-ctr';
+import { uploadFileCTR } from '@/services/grpc/boss/v2/upload-file-ctr';
+import { updateFileMetadataCTR } from '@/services/grpc/boss/v2/update-file-metadata-ctr';
 import { updateFileMetadataWUP } from '@/services/grpc/boss/v2/update-file-metadata-wup';
 import type { BossServiceImplementation } from '@pretendonetwork/grpc/boss/v2/boss_service';
 
@@ -22,7 +22,7 @@ export const bossServiceImplementationV2: BossServiceImplementation = {
 	listFilesWUP,
 	uploadFileWUP,
 	listFilesCTR,
-	// uploadFileCTR,
-	// updateFileMetadataCTR,
+	uploadFileCTR,
+	updateFileMetadataCTR,
 	updateFileMetadataWUP
 };

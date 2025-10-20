@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import express from 'express';
-import { getTaskFilesWithAttributes } from '@/database';
+import { getCTRTaskFilesWithAttributes } from '@/database';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
 
@@ -40,7 +40,7 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 	const attribute2 = request.query.a2;
 	const attribute3 = request.query.a3;
 
-	const files = await getTaskFilesWithAttributes(false, appID, taskID, country, language, attribute1, attribute2, attribute3);
+	const files = await getCTRTaskFilesWithAttributes(false, appID, taskID, country, language, attribute1, attribute2, attribute3);
 
 	// * https://gist.github.com/DaniElectra/ada7ecc930a84432f2045f6fcabac84f#nintendo-boss-file-list-server-npfl
 	// *

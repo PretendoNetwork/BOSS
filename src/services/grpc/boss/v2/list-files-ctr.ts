@@ -1,6 +1,6 @@
 import { Status, ServerError } from 'nice-grpc';
 import { isValidCountryCode, isValidLanguage } from '@/util';
-import { getTaskFiles } from '@/database';
+import { getCTRTaskFiles } from '@/database';
 import type { ListFilesCTRRequest, ListFilesCTRResponse } from '@pretendonetwork/grpc/boss/v2/list_files_ctr';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
@@ -35,30 +35,34 @@ export async function listFilesCTR(request: ListFilesCTRRequest): Promise<ListFi
 		throw new ServerError(Status.INVALID_ARGUMENT, `${language} is not a valid language`);
 	}
 
-	const files = await getTaskFiles(false, bossAppID, taskID, country, language);
+	const files = await getCTRTaskFiles(false, bossAppID, taskID, country, language);
 
 	return {
 		files: files.map(file => ({
 			deleted: file.deleted,
-			dataId: file.data_id,
+			dataId: BigInt(file.serial_number), // TODO - Is this okay?
 			taskId: file.task_id,
 			bossAppId: file.boss_app_id,
 			supportedCountries: file.supported_countries,
 			supportedLanguages: file.supported_languages,
-			attributes: {
-				attribute1: file.attribute1,
-				attribute2: file.attribute2,
-				attribute3: file.attribute3,
-				description: file.password
-			},
+			attributes: file.attributes,
 			creatorPid: file.creator_pid,
 			name: file.name,
 			hash: file.hash,
-			serialNumber: 0, // TODO - Don't stub this
-			payloadContents: [], // TODO - Don't stub this
+			serialNumber: file.serial_number,
+			payloadContents: file.payload_contents.map(payloadContentInfo => ({
+				titleId: payloadContentInfo.title_id,
+				contentDatatype: payloadContentInfo.content_datatype,
+				nsDataId: payloadContentInfo.ns_data_id,
+				version: payloadContentInfo.version,
+				size: payloadContentInfo.size
+			})),
 			size: file.size,
 			createdTimestamp: file.created,
-			updatedTimestamp: file.updated
+			updatedTimestamp: file.updated,
+			flags: {
+				markArrivedPrivileged: file.flags.mark_arrived_privileged
+			}
 		}))
 	};
 }

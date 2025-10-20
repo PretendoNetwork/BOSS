@@ -2,12 +2,14 @@ import mongoose from 'mongoose';
 import { CECData } from '@/models/cec-data';
 import { CECSlot } from '@/models/cec-slot';
 import { Task } from '@/models/task';
-import { File } from '@/models/file';
+import { FileCTR } from '@/models/file-ctr';
+import { FileWUP } from '@/models/file-wup';
 import { config } from '@/config-manager';
 import type { HydratedCECDataDocument } from '@/types/mongoose/cec-data';
 import type { HydratedCECSlotDocument, ICECSlot } from '@/types/mongoose/cec-slot';
 import type { HydratedTaskDocument, ITask } from '@/types/mongoose/task';
-import type { HydratedFileDocument, IFile } from '@/types/mongoose/file';
+import type { HydratedFileCTRDocument, IFileCTR } from '@/types/mongoose/file-ctr';
+import type { HydratedFileWUPDocument, IFileWUP } from '@/types/mongoose/file-wup';
 
 const connection_string: string = config.mongoose.connection_string;
 
@@ -52,10 +54,10 @@ export function getTask(bossAppID: string, taskID: string): Promise<HydratedTask
 	});
 }
 
-export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string): Promise<HydratedFileDocument[]> {
+export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string): Promise<HydratedFileCTRDocument[]> {
 	verifyConnected();
 
-	const filter: mongoose.FilterQuery<IFile> = {
+	const filter: mongoose.FilterQuery<IFileCTR> = {
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		$and: []
@@ -87,13 +89,51 @@ export function getTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: s
 		delete filter.$and;
 	}
 
-	return File.find(filter);
+	return FileCTR.find(filter);
 }
 
-export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, attribute1?: string, attribute2?: string, attribute3?: string): Promise<HydratedFileDocument[]> {
+export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string): Promise<HydratedFileWUPDocument[]> {
 	verifyConnected();
 
-	const filter: mongoose.FilterQuery<IFile> = {
+	const filter: mongoose.FilterQuery<IFileWUP> = {
+		task_id: taskID.slice(0, 7),
+		boss_app_id: bossAppID,
+		$and: []
+	};
+
+	if (!allowDeleted) {
+		filter.deleted = false;
+	}
+
+	if (country) {
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: country }
+			]
+		});
+	}
+
+	if (language) {
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: language }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
+	}
+
+	return FileWUP.find(filter);
+}
+
+export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, attribute1?: string, attribute2?: string, attribute3?: string): Promise<HydratedFileWUPDocument[]> {
+	verifyConnected();
+
+	const filter: mongoose.FilterQuery<IFileWUP> = {
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		$and: []
@@ -137,13 +177,13 @@ export function getTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: str
 		delete filter.$and;
 	}
 
-	return File.find(filter);
+	return FileWUP.find(filter);
 }
 
-export function getTaskFile(bossAppID: string, taskID: string, name: string, country?: string, language?: string): Promise<HydratedFileDocument | null> {
+export function getCTRTaskFile(bossAppID: string, taskID: string, name: string, country?: string, language?: string): Promise<HydratedFileCTRDocument | null> {
 	verifyConnected();
 
-	const filter: mongoose.FilterQuery<IFile> = {
+	const filter: mongoose.FilterQuery<IFileCTR> = {
 		deleted: false,
 		boss_app_id: bossAppID,
 		task_id: taskID.slice(0, 7),
@@ -173,13 +213,58 @@ export function getTaskFile(bossAppID: string, taskID: string, name: string, cou
 		delete filter.$and;
 	}
 
-	return File.findOne<HydratedFileDocument>(filter);
+	return FileCTR.findOne<HydratedFileCTRDocument>(filter);
 }
 
-export function getTaskFileByDataID(dataID: bigint): Promise<HydratedFileDocument | null> {
+export function getWUPTaskFile(bossAppID: string, taskID: string, name: string, country?: string, language?: string): Promise<HydratedFileWUPDocument | null> {
 	verifyConnected();
 
-	return File.findOne<HydratedFileDocument>({
+	const filter: mongoose.FilterQuery<IFileWUP> = {
+		deleted: false,
+		boss_app_id: bossAppID,
+		task_id: taskID.slice(0, 7),
+		name: name,
+		$and: []
+	};
+
+	if (country) {
+		filter.$and?.push({
+			$or: [
+				{ supported_countries: { $eq: [] } },
+				{ supported_countries: country }
+			]
+		});
+	}
+
+	if (language) {
+		filter.$and?.push({
+			$or: [
+				{ supported_languages: { $eq: [] } },
+				{ supported_languages: language }
+			]
+		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
+	}
+
+	return FileWUP.findOne<HydratedFileWUPDocument>(filter);
+}
+
+export function getCTRTaskFileBySerialNumber(serialNumber: number): Promise<HydratedFileCTRDocument | null> {
+	verifyConnected();
+
+	return FileCTR.findOne<HydratedFileCTRDocument>({
+		deleted: false,
+		serial_number: serialNumber
+	});
+}
+
+export function getWUPTaskFileByDataID(dataID: bigint): Promise<HydratedFileWUPDocument | null> {
+	verifyConnected();
+
+	return FileWUP.findOne<HydratedFileWUPDocument>({
 		deleted: false,
 		data_id: Number(dataID)
 	});

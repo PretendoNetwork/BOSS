@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTaskFile } from '@/database';
+import { getCTRTaskFile } from '@/database';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
@@ -23,7 +23,7 @@ npdl.get([
 }>, response) => {
 	const { appID, taskID, countryCode, languageCode, fileName } = request.params;
 
-	const file = await getTaskFile(appID, taskID, fileName, countryCode, languageCode);
+	const file = await getCTRTaskFile(appID, taskID, fileName, countryCode, languageCode);
 
 	if (!file) {
 		response.sendStatus(404);

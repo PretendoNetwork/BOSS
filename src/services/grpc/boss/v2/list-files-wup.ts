@@ -1,6 +1,6 @@
 import { Status, ServerError } from 'nice-grpc';
 import { isValidCountryCode, isValidLanguage } from '@/util';
-import { getTaskFiles } from '@/database';
+import { getWUPTaskFiles } from '@/database';
 import type { ListFilesWUPRequest, ListFilesWUPResponse } from '@pretendonetwork/grpc/boss/v2/list_files_wup';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
@@ -35,7 +35,7 @@ export async function listFilesWUP(request: ListFilesWUPRequest): Promise<ListFi
 		throw new ServerError(Status.INVALID_ARGUMENT, `${language} is not a valid language`);
 	}
 
-	const files = await getTaskFiles(false, bossAppID, taskID, country, language);
+	const files = await getWUPTaskFiles(false, bossAppID, taskID, country, language);
 
 	return {
 		files: files.map(file => ({
@@ -58,8 +58,8 @@ export async function listFilesWUP(request: ListFilesWUPRequest): Promise<ListFi
 			size: file.size,
 			notifyOnNew: file.notify_on_new,
 			notifyLed: file.notify_led,
-			conditionPlayed: 0n, // TODO - Don't stub this
-			autoDelete: false, // TODO - Don't stub this
+			conditionPlayed: file.condition_played,
+			autoDelete: file.auto_delete,
 			createdTimestamp: file.created,
 			updatedTimestamp: file.updated
 		}))

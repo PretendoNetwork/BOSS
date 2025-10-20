@@ -1,6 +1,6 @@
 import { Status, ServerError } from 'nice-grpc';
 import { isValidCountryCode, isValidLanguage } from '@/util';
-import { getTaskFiles } from '@/database';
+import { getWUPTaskFiles } from '@/database';
 import type { ListFilesRequest, ListFilesResponse } from '@pretendonetwork/grpc/boss/list_files';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
@@ -35,7 +35,7 @@ export async function listFiles(request: ListFilesRequest): Promise<ListFilesRes
 		throw new ServerError(Status.INVALID_ARGUMENT, `${language} is not a valid language`);
 	}
 
-	const files = await getTaskFiles(false, bossAppID, taskID, country, language);
+	const files = await getWUPTaskFiles(false, bossAppID, taskID, country, language);
 
 	return {
 		files: files.map(file => ({

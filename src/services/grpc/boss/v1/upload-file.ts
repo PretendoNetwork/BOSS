@@ -1,8 +1,8 @@
 import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5 } from '@/util';
-import { getTask, getTaskFile } from '@/database';
-import { File } from '@/models/file';
+import { getTask, getWUPTaskFile } from '@/database';
+import { FileWUP } from '@/models/file-wup';
 import { config } from '@/config-manager';
 import { uploadCDNFile } from '@/cdn';
 import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
@@ -113,7 +113,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.ABORTED, message);
 	}
 
-	let file = await getTaskFile(bossAppID, taskID, name);
+	let file = await getWUPTaskFile(bossAppID, taskID, name);
 
 	if (file) {
 		file.deleted = true;
@@ -122,7 +122,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		await file.save();
 	}
 
-	file = await File.create({
+	file = await FileWUP.create({
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		file_key: key,

@@ -1,8 +1,8 @@
 import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5 } from '@/util';
-import { getTask, getTaskFile } from '@/database';
-import { File } from '@/models/file';
+import { getTask, getWUPTaskFile } from '@/database';
+import { FileWUP } from '@/models/file-wup';
 import { config } from '@/config-manager';
 import { uploadCDNFile } from '@/cdn';
 import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
@@ -81,6 +81,7 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 	let encryptedData: Buffer;
 
 	try {
+		// TODO - Check the first few bytes of the uploaded content to see if it's encrypted already, to support pre-encrypted content?
 		encryptedData = encryptWiiU(data, config.crypto.wup.aes_key, config.crypto.wup.hmac_key);
 	} catch (error: unknown) {
 		let message = 'Unknown file encryption error';
@@ -113,7 +114,7 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		throw new ServerError(Status.ABORTED, message);
 	}
 
-	let file = await getTaskFile(bossAppID, taskID, name);
+	let file = await getWUPTaskFile(bossAppID, taskID, name);
 
 	if (file) {
 		file.deleted = true;
@@ -122,7 +123,7 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		await file.save();
 	}
 
-	file = await File.create({
+	file = await FileWUP.create({
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		file_key: key,
@@ -135,6 +136,8 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		size: BigInt(encryptedData.length),
 		notify_on_new: notifyOnNew,
 		notify_led: notifyLed,
+		condition_played: request.conditionPlayed,
+		auto_delete: request.autoDelete,
 		created: Date.now(),
 		updated: Date.now()
 	});
@@ -165,8 +168,8 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 			size: file.size,
 			notifyOnNew: file.notify_on_new,
 			notifyLed: file.notify_led,
-			conditionPlayed: 0n, // TODO - Don't stub this
-			autoDelete: false, // TODO - Don't stub this
+			conditionPlayed: request.conditionPlayed,
+			autoDelete: request.autoDelete,
 			createdTimestamp: file.created,
 			updatedTimestamp: file.updated
 		}

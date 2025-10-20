@@ -1,6 +1,6 @@
 import type { Model, HydratedDocument } from 'mongoose';
 
-export interface IFile {
+export interface IFileWUP {
 	deleted: boolean;
 	file_key: string;
 	data_id: bigint;
@@ -19,14 +19,16 @@ export interface IFile {
 	size: bigint;
 	notify_on_new: string[];
 	notify_led: boolean;
+	condition_played: bigint;
+	auto_delete: boolean;
 	created: bigint;
 	updated: bigint;
 }
 
-export interface IFileMethods {}
+export interface IFileWUPMethods {}
 
-interface IFileQueryHelpers {}
+interface IFileWUPQueryHelpers {}
 
-export type FileModel = Model<IFile, IFileQueryHelpers, IFileMethods>;
+export type FileWUPModel = Model<IFileWUP, IFileWUPQueryHelpers, IFileWUPMethods>;
 
-export type HydratedFileDocument = HydratedDocument<IFile, IFileMethods>;
+export type HydratedFileWUPDocument = HydratedDocument<IFileWUP, IFileWUPMethods>;
