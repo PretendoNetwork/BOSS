@@ -1,14 +1,12 @@
 import { createServer } from 'nice-grpc';
 import { BOSSDefinition as BossServiceDefinitionV1 } from '@pretendonetwork/grpc/boss/boss_service';
+import { BossServiceDefinition as BossServiceDefinitionV2 } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import { apiKeyMiddleware as apiKeyMiddlewareV1 } from '@/services/grpc/boss/v1/middleware/api-key-middleware';
 import { authenticationMiddleware as authenticationMiddlewareV1 } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import { bossServiceImplementationV1 } from '@/services/grpc/boss/v1/implementation';
-
-import { BossServiceDefinition as BossServiceDefinitionV2 } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import { apiKeyMiddleware as apiKeyMiddlewareV2 } from '@/services/grpc/boss/v2/middleware/api-key-middleware';
 import { authenticationMiddleware as authenticationMiddlewareV2 } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import { bossServiceImplementationV2 } from '@/services/grpc/boss/v2/implementation';
-
 import { config } from '@/config-manager';
 import type { Server } from 'nice-grpc';
 

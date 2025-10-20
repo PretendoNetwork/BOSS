@@ -1,7 +1,7 @@
 import { Status, ServerError } from 'nice-grpc';
+import { PlatformType } from '@pretendonetwork/grpc/boss/v2/platform_type';
 import { getCTRTaskFileBySerialNumber, getWUPTaskFileByDataID } from '@/database';
 import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
-import { PlatformType } from '@pretendonetwork/grpc/boss/v2/platform_type';
 import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { DeleteFileRequest } from '@pretendonetwork/grpc/boss/v2/delete_file';
