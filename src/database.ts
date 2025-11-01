@@ -130,10 +130,10 @@ export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 	return FileWUP.find(filter);
 }
 
-export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, attribute1?: string, attribute2?: string, attribute3?: string): Promise<HydratedFileWUPDocument[]> {
+export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, attribute1?: string, attribute2?: string, attribute3?: string): Promise<HydratedFileCTRDocument[]> {
 	verifyConnected();
 
-	const filter: mongoose.FilterQuery<IFileWUP> = {
+	const filter: mongoose.FilterQuery<IFileCTR> = {
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		$and: []
@@ -162,22 +162,22 @@ export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: 
 	}
 
 	if (attribute1) {
-		filter.attribute1 = attribute1;
+		filter.attributes.attribute1 = attribute1;
 	}
 
 	if (attribute2) {
-		filter.attribute2 = attribute2;
+		filter.attributes.attribute2 = attribute2;
 	}
 
 	if (attribute3) {
-		filter.attribute3 = attribute3;
+		filter.attributes.attribute3 = attribute3;
 	}
 
 	if (filter.$and?.length === 0) {
 		delete filter.$and;
 	}
 
-	return FileWUP.find(filter);
+	return FileCTR.find(filter);
 }
 
 export function getCTRTaskFile(bossAppID: string, taskID: string, name: string, country?: string, language?: string): Promise<HydratedFileCTRDocument | null> {
