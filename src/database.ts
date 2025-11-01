@@ -252,7 +252,7 @@ export function getWUPTaskFile(bossAppID: string, taskID: string, name: string, 
 	return FileWUP.findOne<HydratedFileWUPDocument>(filter);
 }
 
-export function getCTRTaskFileBySerialNumber(serialNumber: number): Promise<HydratedFileCTRDocument | null> {
+export function getCTRTaskFileBySerialNumber(serialNumber: bigint): Promise<HydratedFileCTRDocument | null> {
 	verifyConnected();
 
 	return FileCTR.findOne<HydratedFileCTRDocument>({

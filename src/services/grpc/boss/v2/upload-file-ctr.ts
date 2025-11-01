@@ -1,5 +1,5 @@
 import { Status, ServerError } from 'nice-grpc';
-import { encrypt3DS } from '@pretendonetwork/boss-crypto';
+import { CTR_BOSS_FLAGS, encrypt3DS } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidLanguage, md5 } from '@/util';
 import { connection as databaseConnection, getTask, getCTRTaskFile } from '@/database';
 import { FileCTR } from '@/models/file-ctr';
@@ -110,10 +110,13 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 			content: payload.content
 		}));
 
-		// TODO - Add flags here. @pretendonetwork/boss-crypto does not export CTR_BOSS_FLAGS at the moment
+		let flags = 0n;
+		if (request.flags?.markArrivedPrivileged) {
+			flags |= CTR_BOSS_FLAGS.MARK_ARRIVED_PRIVILEGED;
+		}
 
 		// TODO - Somehow support pre-encrypted content?
-		const encryptedData = encrypt3DS(config.crypto.ctr.aes_key, BigInt(file.serial_number), cryptoOptions);
+		const encryptedData = encrypt3DS(config.crypto.ctr.aes_key, file.serial_number, cryptoOptions, flags);
 		const contentHash = md5(encryptedData);
 		const key = `${bossAppID}/${taskID}/${contentHash}`;
 
@@ -140,7 +143,7 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 	return {
 		file: {
 			deleted: file.deleted,
-			dataId: BigInt(file.serial_number), // TODO - Is this okay?
+			dataId: file.serial_number,
 			taskId: file.task_id,
 			bossAppId: file.boss_app_id,
 			supportedCountries: file.supported_countries,

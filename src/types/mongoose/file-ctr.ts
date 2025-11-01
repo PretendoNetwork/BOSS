@@ -17,7 +17,7 @@ export interface IFileCTR {
 		description: string;
 	};
 	name: string;
-	serial_number: number; // * This is effectively the predecessor of the Wii U DataID
+	serial_number: bigint; // * This is effectively the predecessor of the Wii U DataID
 	payload_contents: {
 		title_id: bigint;
 		content_datatype: number;

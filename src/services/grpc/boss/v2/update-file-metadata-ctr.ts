@@ -22,7 +22,7 @@ export async function updateFileMetadataCTR(request: UpdateFileMetadataCTRReques
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing file update data');
 	}
 
-	const file = await getCTRTaskFileBySerialNumber(Number(serialNumber));
+	const file = await getCTRTaskFileBySerialNumber(serialNumber);
 
 	if (!file || file.deleted) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `File ${serialNumber} not found`);

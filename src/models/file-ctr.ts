@@ -22,7 +22,7 @@ const FileCTRSchema = new mongoose.Schema<IFileCTR, FileCTRModel, IFileCTRMethod
 		description: String
 	},
 	name: String,
-	serial_number: Number, // * This is effectively the predecessor of the Wii U DataID. TODO - 3DBrew says this is a uint64?
+	serial_number: BigInt, // * This is effectively the predecessor of the Wii U DataID
 	payload_contents: [{
 		title_id: BigInt,
 		content_datatype: Number,

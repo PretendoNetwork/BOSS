@@ -40,7 +40,7 @@ export async function listFilesCTR(request: ListFilesCTRRequest): Promise<ListFi
 	return {
 		files: files.map(file => ({
 			deleted: file.deleted,
-			dataId: BigInt(file.serial_number), // TODO - Is this okay?
+			dataId: file.serial_number, // TODO - Is this okay?
 			taskId: file.task_id,
 			bossAppId: file.boss_app_id,
 			supportedCountries: file.supported_countries,

@@ -24,7 +24,7 @@ export async function deleteFile(request: DeleteFileRequest, context: CallContex
 	let file: HydratedFileCTRDocument | HydratedFileWUPDocument | null;
 
 	if (request.platformType === PlatformType.PLATFORM_TYPE_CTR) {
-		file = await getCTRTaskFileBySerialNumber(Number(dataID));
+		file = await getCTRTaskFileBySerialNumber(dataID);
 	} else if (request.platformType === PlatformType.PLATFORM_TYPE_WUP) {
 		file = await getWUPTaskFileByDataID(dataID);
 	} else {
