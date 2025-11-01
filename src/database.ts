@@ -74,6 +74,10 @@ export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_countries: country }
 			]
 		});
+	} else {
+		filter.$and?.push({
+			supported_countries: { $eq: [] }
+		});
 	}
 
 	if (language) {
@@ -83,10 +87,10 @@ export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_languages: language }
 			]
 		});
-	}
-
-	if (filter.$and?.length === 0) {
-		delete filter.$and;
+	} else {
+		filter.$and?.push({
+			supported_languages: { $eq: [] }
+		});
 	}
 
 	return FileCTR.find(filter);
@@ -112,6 +116,10 @@ export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_countries: country }
 			]
 		});
+	} else {
+		filter.$and?.push({
+			supported_countries: { $eq: [] }
+		});
 	}
 
 	if (language) {
@@ -121,10 +129,10 @@ export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_languages: language }
 			]
 		});
-	}
-
-	if (filter.$and?.length === 0) {
-		delete filter.$and;
+	} else {
+		filter.$and?.push({
+			supported_languages: { $eq: [] }
+		});
 	}
 
 	return FileWUP.find(filter);
@@ -150,6 +158,10 @@ export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: 
 				{ supported_countries: country }
 			]
 		});
+	} else {
+		filter.$and?.push({
+			supported_countries: { $eq: [] }
+		});
 	}
 
 	if (language) {
@@ -158,6 +170,10 @@ export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: 
 				{ supported_languages: { $eq: [] } },
 				{ supported_languages: language }
 			]
+		});
+	} else {
+		filter.$and?.push({
+			supported_languages: { $eq: [] }
 		});
 	}
 
@@ -198,6 +214,10 @@ export function getCTRTaskFile(bossAppID: string, taskID: string, name: string, 
 				{ supported_countries: country }
 			]
 		});
+	} else {
+		filter.$and?.push({
+			supported_countries: { $eq: [] }
+		});
 	}
 
 	if (language) {
@@ -207,10 +227,10 @@ export function getCTRTaskFile(bossAppID: string, taskID: string, name: string, 
 				{ supported_languages: language }
 			]
 		});
-	}
-
-	if (filter.$and?.length === 0) {
-		delete filter.$and;
+	} else {
+		filter.$and?.push({
+			supported_languages: { $eq: [] }
+		});
 	}
 
 	return FileCTR.findOne<HydratedFileCTRDocument>(filter);
@@ -234,6 +254,10 @@ export function getWUPTaskFile(bossAppID: string, taskID: string, name: string, 
 				{ supported_countries: country }
 			]
 		});
+	} else {
+		filter.$and?.push({
+			supported_countries: { $eq: [] }
+		});
 	}
 
 	if (language) {
@@ -243,10 +267,10 @@ export function getWUPTaskFile(bossAppID: string, taskID: string, name: string, 
 				{ supported_languages: language }
 			]
 		});
-	}
-
-	if (filter.$and?.length === 0) {
-		delete filter.$and;
+	} else {
+		filter.$and?.push({
+			supported_languages: { $eq: [] }
+		});
 	}
 
 	return FileWUP.findOne<HydratedFileWUPDocument>(filter);

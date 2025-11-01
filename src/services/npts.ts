@@ -24,15 +24,24 @@ function buildFile(task: HydratedTaskDocument, file: HydratedFileWUPDocument): a
 	};
 }
 
-npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request: express.Request<{
+	id: string;
+	bossAppId: string;
+	taskId: string;
+}, any, any, {
+	c?: string;
+	l?: string;
+}>, response) => {
 	const { bossAppId, taskId } = request.params;
+	const country = request.query.c;
+	const language = request.query.l;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const files = await getWUPTaskFiles(false, bossAppId, taskId);
+	const files = await getWUPTaskFiles(false, bossAppId, taskId, country, language);
 
 	const xmlContent = {
 		TaskSheet: {
@@ -49,15 +58,25 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
 	response.send(xmlbuilder.create(xmlContent, xmlHeadSettings).end({ pretty: true }));
 });
 
-npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, response) => {
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request: express.Request<{
+	id: string;
+	bossAppId: string;
+	taskId: string;
+	fileName: string;
+}, any, any, {
+	c?: string;
+	l?: string;
+}>, response) => {
 	const { bossAppId, taskId, fileName } = request.params;
+	const country = request.query.c;
+	const language = request.query.l;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const file = await getWUPTaskFile(bossAppId, taskId, fileName);
+	const file = await getWUPTaskFile(bossAppId, taskId, fileName, country, language);
 	if (!file) {
 		return response.sendStatus(404);
 	}
