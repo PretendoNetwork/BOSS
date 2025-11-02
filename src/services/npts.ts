@@ -10,18 +10,32 @@ const npts = express.Router();
 
 const xmlHeadSettings = { encoding: 'UTF-8', version: '1.0' };
 
-function buildFile(task: HydratedTaskDocument, file: HydratedFileWUPDocument): any {
-	return {
-		Filename: file.name,
-		DataId: file.data_id,
-		Type: file.type,
-		Url: `https://${config.domains.npdi}/p01/data/1/${task.boss_app_id}/${file.data_id}/${file.hash}`,
-		Size: file.size,
-		Notify: {
-			New: file.notify_on_new.join(','),
-			LED: file.notify_led
-		}
-	};
+function buildFile(task: HydratedTaskDocument, file: HydratedFileWUPDocument, attributesMode: boolean): any {
+	if (attributesMode) {
+		return {
+			Filename: file.name,
+			Type: file.type,
+			Size: file.size,
+			Attributes: {
+				Attribute1: file.attribute1,
+				Attribute2: file.attribute2,
+				Attribute3: file.attribute3,
+				Description: file.password
+			}
+		};
+	} else {
+		return {
+			Filename: file.name,
+			DataId: file.data_id,
+			Type: file.type,
+			Url: `https://${config.domains.npdi}/p01/data/1/${task.boss_app_id}/${file.data_id}/${file.hash}`,
+			Size: file.size,
+			Notify: {
+				New: file.notify_on_new.join(','),
+				LED: file.notify_led
+			}
+		};
+	}
 }
 
 npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request: express.Request<{
@@ -31,10 +45,12 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request: express.Reques
 }, any, any, {
 	c?: string;
 	l?: string;
+	mode?: string;
 }>, response) => {
 	const { bossAppId, taskId } = request.params;
 	const country = request.query.c;
 	const language = request.query.l;
+	const mode = request.query.mode;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
@@ -49,7 +65,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request: express.Reques
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: files.map(f => buildFile(task, f))
+				File: files.map(f => buildFile(task, f, mode === 'attr'))
 			}
 		}
 	};
@@ -66,10 +82,12 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request: expr
 }, any, any, {
 	c?: string;
 	l?: string;
+	mode?: string;
 }>, response) => {
 	const { bossAppId, taskId, fileName } = request.params;
 	const country = request.query.c;
 	const language = request.query.l;
+	const mode = request.query.mode;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
@@ -87,7 +105,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request: expr
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: buildFile(task, file)
+				File: buildFile(task, file, mode === 'attr')
 			}
 		}
 	};
