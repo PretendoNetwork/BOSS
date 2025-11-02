@@ -203,7 +203,7 @@ export async function listKnownBOSSApps(): Promise<ListKnownBOSSAppsResponse> {
 				bossAppId: '4krJA4Gx3jF5nhQf',
 				titleId: BigInt(0x000500001012BE00),
 				titleRegion: 'EUR',
-				name: 'ピクミン３ (PIKMIN 3)',
+				name: 'PIKMIN 3',
 				tasks: ['histgrm']
 			},
 			{
@@ -217,7 +217,7 @@ export async function listKnownBOSSApps(): Promise<ListKnownBOSSAppsResponse> {
 				bossAppId: 'VWqUTspR5YtjDjxa',
 				titleId: BigInt(0x000500001012BC00),
 				titleRegion: 'JPN',
-				name: 'PIKMIN 3',
+				name: 'ピクミン３ (PIKMIN 3)',
 				tasks: ['histgrm']
 			},
 			{
