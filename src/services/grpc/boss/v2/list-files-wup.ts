@@ -45,12 +45,7 @@ export async function listFilesWUP(request: ListFilesWUPRequest): Promise<ListFi
 			bossAppId: file.boss_app_id,
 			supportedCountries: file.supported_countries,
 			supportedLanguages: file.supported_languages,
-			attributes: {
-				attribute1: file.attribute1,
-				attribute2: file.attribute2,
-				attribute3: file.attribute3,
-				description: file.password
-			},
+			attributes: file.attributes,
 			creatorPid: file.creator_pid,
 			name: file.name,
 			type: file.type,

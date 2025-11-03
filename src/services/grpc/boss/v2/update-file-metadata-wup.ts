@@ -43,10 +43,7 @@ export async function updateFileMetadataWUP(request: UpdateFileMetadataWUPReques
 	file.boss_app_id = updateData.bossAppId;
 	file.supported_countries = updateData.supportedCountries;
 	file.supported_languages = updateData.supportedLanguages;
-	file.password = updateData.attributes ? updateData.attributes.description : file.password;
-	file.attribute1 = updateData.attributes ? updateData.attributes.attribute1 : file.attribute1;
-	file.attribute2 = updateData.attributes ? updateData.attributes.attribute2 : file.attribute2;
-	file.attribute3 = updateData.attributes ? updateData.attributes.attribute3 : file.attribute3;
+	file.attributes = updateData.attributes ? updateData.attributes : file.attributes;
 	file.name = updateData.name;
 	file.type = updateData.type;
 	file.notify_on_new = updateData.notifyOnNew;

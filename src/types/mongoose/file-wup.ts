@@ -8,10 +8,12 @@ export interface IFileWUP {
 	boss_app_id: string;
 	supported_countries: string[];
 	supported_languages: string[];
-	password: string;
-	attribute1: string;
-	attribute2: string;
-	attribute3: string;
+	attributes: {
+		attribute1: string;
+		attribute2: string;
+		attribute3: string;
+		description: string;
+	};
 	creator_pid: number;
 	name: string;
 	type: string;

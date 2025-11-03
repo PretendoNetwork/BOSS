@@ -13,10 +13,12 @@ const FileWUPSchema = new mongoose.Schema<IFileWUP, FileWUPModel, IFileWUPMethod
 	boss_app_id: String,
 	supported_countries: [String],
 	supported_languages: [String],
-	password: String,
-	attribute1: String,
-	attribute2: String,
-	attribute3: String,
+	attributes: {
+		attribute1: String,
+		attribute2: String,
+		attribute3: String,
+		description: String
+	},
 	creator_pid: Number,
 	name: String,
 	type: String,

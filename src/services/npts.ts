@@ -17,10 +17,10 @@ function buildFile(task: HydratedTaskDocument, file: HydratedFileWUPDocument, at
 			Type: file.type,
 			Size: file.size,
 			Attributes: {
-				Attribute1: file.attribute1,
-				Attribute2: file.attribute2,
-				Attribute3: file.attribute3,
-				Description: file.password
+				Attribute1: file.attributes.attribute1,
+				Attribute2: file.attributes.attribute2,
+				Attribute3: file.attributes.attribute3,
+				Description: file.attributes.description
 			}
 		};
 	} else {
