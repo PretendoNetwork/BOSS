@@ -8,7 +8,7 @@ const FileWUPSchema = new mongoose.Schema<IFileWUP, FileWUPModel, IFileWUPMethod
 		default: false
 	},
 	file_key: String,
-	data_id: Number, // TODO - Wait until https://github.com/typegoose/auto-increment/pull/21 is merged and then change this to BigInt
+	data_id: BigInt,
 	task_id: String,
 	boss_app_id: String,
 	supported_countries: [String],
