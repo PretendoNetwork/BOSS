@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 import { request } from 'undici';
 import { Command } from 'commander';
-import { decryptWiiU } from '@pretendonetwork/boss-crypto';
+import { decrypt3DS } from '@pretendonetwork/boss-crypto';
 import { PlatformType } from '@pretendonetwork/grpc/boss/v2/platform_type';
 import { commandHandler, getCliContext } from './utils';
 import { logOutputList, logOutputObject } from './output';
@@ -15,17 +15,16 @@ const listCmd = new Command('ls')
 	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
 		const [appId, taskId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFilesWUP({
+		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
 			taskId: taskId
 		});
 		logOutputList(files, {
 			format: cmd.format,
-			onlyIncludeKeys: ['dataId', 'name', 'type', 'size'],
+			onlyIncludeKeys: ['dataId', 'name', 'size'],
 			mapping: {
 				dataId: 'Data ID',
 				name: 'Name',
-				type: 'Type',
 				size: 'Size (bytes)'
 			}
 		});
@@ -39,7 +38,7 @@ const viewCmd = new Command('view')
 	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
 		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFilesWUP({
+		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
 			taskId: taskId
 		});
@@ -51,16 +50,14 @@ const viewCmd = new Command('view')
 		logOutputObject({
 			dataId: file.dataId,
 			name: file.name,
-			type: file.type,
 			size: file.size,
 			hash: file.hash,
 			supportedCountries: file.supportedCountries,
 			supportedLanguages: file.supportedLanguages,
+			attributes: file.attributes,
 			creatorPid: file.creatorPid,
-			notify: {
-				new: file.notifyOnNew,
-				led: file.notifyLed
-			},
+			payloadContents: file.payloadContents,
+			flags: file.flags,
 			createdAt: new Date(Number(file.createdTimestamp)),
 			updatedAt: new Date(Number(file.updatedTimestamp))
 		}, {
@@ -77,7 +74,7 @@ const downloadCmd = new Command('download')
 	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
 		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFilesWUP({
+		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
 			taskId: taskId
 		});
@@ -87,10 +84,12 @@ const downloadCmd = new Command('download')
 			process.exit(1);
 		}
 
-		const npdi = ctx.getNpdiUrl();
-		const { body, statusCode } = await request(`${npdi.url}/p01/data/1/${file.bossAppId}/${file.dataId}/${file.hash}`, {
+		const npdl = ctx.getNpdlUrl();
+		const country = file.supportedCountries.length > 0 ? '/' + file.supportedCountries[0] : '';
+		const language = file.supportedLanguages.length > 0 ? '/' + file.supportedCountries[0] : '';
+		const { body, statusCode } = await request(`${npdl.url}/p01/nsa/${file.bossAppId}/${file.taskId}${country}${language}/${file.name}`, {
 			headers: {
-				Host: npdi.host
+				Host: npdl.host
 			}
 		});
 		if (statusCode > 299) {
@@ -106,9 +105,10 @@ const downloadCmd = new Command('download')
 		let buffer: Buffer = Buffer.concat(chunks);
 
 		if (cmd.opts().decrypt) {
-			const keys = ctx.getWiiUKeys();
-			const decrypted = decryptWiiU(buffer, keys.aesKey, keys.hmacKey);
-			buffer = decrypted.content;
+			const keys = ctx.get3DSKeys();
+			const decrypted = decrypt3DS(buffer, keys.aesKey);
+			// TODO - Handle multiple payloads
+			buffer = decrypted.payload_contents[0].content;
 		}
 
 		await pipeline(Readable.from(buffer), process.stdout);
@@ -119,7 +119,10 @@ const createCmd = new Command('create')
 	.argument('<app_id>', 'BOSS app to store the task file in')
 	.argument('<task_id>', 'Task to store the task file in')
 	.requiredOption('--name <name>', 'Name of the task file')
-	.requiredOption('--type <type>', 'Type of task file')
+	.requiredOption('--title-id <titleId>', 'Target title ID of the payload')
+	.requiredOption('--content-datatype <contentDatatype>', 'Content datatype of the payload')
+	.requiredOption('--ns-data-id <nsDataId>', 'NS Data ID of the payload')
+	.requiredOption('--version <version>', 'Version of the payload')
 	.requiredOption('--file <file>', 'Path of the file to upload')
 	.option('--country <country...>', 'Countries for this task file')
 	.option('--lang <language...>', 'Languages for this task file')
@@ -127,18 +130,16 @@ const createCmd = new Command('create')
 	.option('--attribute2 [attribute2]', 'Attribute 2 for this task file')
 	.option('--attribute3 [attribute3]', 'Attribute 3 for this task file')
 	.option('--desc [desc]', 'Description for this task file')
-	.option('--name-as-id', 'Force the name as the data ID')
-	.option('--notify-new <type...>', 'Add entry to NotifyNew')
-	.option('--notify-led', 'Enable NotifyLED')
+	.option('-m, --mark-arrived-privileged', 'Only notify of new content to privileged titles')
 	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
 		const [appId, taskId] = cmd.args;
-		const opts = cmd.opts<{ name: string; country: string[]; notifyNew: string[]; notifyLed: boolean; lang: string[]; attribute1?: string; attribute2?: string; attribute3?: string; desc?: string; nameAsId?: boolean; type: string; file: string }>();
+		// TODO - Handle multiple payload contents
+		const opts = cmd.opts<{ name: string; titleId: string; contentDatatype: string; nsDataId: string; version: string; file: string; country: string[]; lang: string[]; attribute1?: string; attribute2?: string; attribute3?: string; desc?: string; markArrivedPrivileged: boolean }>();
 		const fileBuf = await fs.readFile(opts.file);
 		const ctx = getCliContext();
-		const { file } = await ctx.grpc.uploadFileWUP({
+		const { file } = await ctx.grpc.uploadFileCTR({
 			taskId: taskId,
 			bossAppId: appId,
-			name: opts.name,
 			supportedCountries: opts.country,
 			supportedLanguages: opts.lang,
 			attributes: {
@@ -147,11 +148,17 @@ const createCmd = new Command('create')
 				attribute3: opts.attribute3,
 				description: opts.desc
 			},
-			type: opts.type,
-			nameEqualsDataId: opts.nameAsId ?? false,
-			data: fileBuf,
-			notifyOnNew: opts.notifyNew,
-			notifyLed: opts.notifyLed
+			name: opts.name,
+			payloadContents: [{
+				titleId: BigInt(parseInt(opts.titleId, 16)),
+				contentDatatype: Number(opts.contentDatatype),
+				nsDataId: Number(opts.nsDataId),
+				version: Number(opts.version),
+				content: fileBuf
+			}],
+			flags: {
+				markArrivedPrivileged: opts.markArrivedPrivileged
+			}
 		});
 		if (!file) {
 			console.log(`Failed to create file!`);
@@ -172,13 +179,13 @@ const deleteCmd = new Command('delete')
 		await ctx.grpc.deleteFile({
 			bossAppId: appId,
 			dataId: dataId,
-			platformType: PlatformType.PLATFORM_TYPE_WUP
+			platformType: PlatformType.PLATFORM_TYPE_CTR
 		});
 		console.log(`Deleted task file with ID ${dataId}`);
 	}));
 
-export const fileCmd = new Command('file')
-	.description('Manage all the Wii U task files in BOSS')
+export const file3DSCmd = new Command('file-3ds')
+	.description('Manage all the 3DS task files in BOSS')
 	.addCommand(listCmd)
 	.addCommand(createCmd)
 	.addCommand(deleteCmd)
