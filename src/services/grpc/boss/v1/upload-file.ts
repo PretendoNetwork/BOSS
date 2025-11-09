@@ -128,6 +128,12 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		file_key: key,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
+		attributes: {
+			attribute1: request.attribute1,
+			attribute2: request.attribute2,
+			attribute3: request.attribute3,
+			description: request.password
+		},
 		creator_pid: context.user?.pid,
 		name: name,
 		type: type,
