@@ -15,7 +15,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 
 	const taskID = request.id.trim();
 	const bossAppID = request.bossAppId.trim();
-	const titleID = request.titleId.toString(16).toLowerCase().padStart(16, '0');
+	const titleID = request.titleId.trim().toLocaleLowerCase();
 	const description = request.description.trim();
 
 	if (!taskID) {
@@ -68,7 +68,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,
-			titleId: BigInt(parseInt(task.title_id, 16)),
+			titleId: task.title_id,
 			description: task.description,
 			createdTimestamp: task.created,
 			updatedTimestamp: task.updated

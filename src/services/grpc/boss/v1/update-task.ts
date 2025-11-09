@@ -43,7 +43,7 @@ export async function updateTask(request: UpdateTaskRequest, context: CallContex
 	}
 
 	task.boss_app_id = updateData.bossAppId ? updateData.bossAppId : task.boss_app_id;
-	task.title_id = updateData.titleId ? updateData.titleId.toString(16).toLowerCase().padStart(16, '0') : task.title_id;
+	task.title_id = updateData.titleId ? updateData.titleId : task.title_id;
 	task.status = updateData.status ? updateData.status : task.status;
 	task.description = updateData.description ? updateData.description : task.description;
 	task.updated = BigInt(Date.now());
