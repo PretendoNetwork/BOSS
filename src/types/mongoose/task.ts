@@ -6,7 +6,7 @@ export interface ITask {
 	in_game_id: string;
 	boss_app_id: string;
 	creator_pid: number;
-	status: 'open'; // TODO - Make this a union. What else is there?
+	status: 'open' | 'close'; // TODO - Make this a union. What else is there?
 	title_id: string;
 	description: string;
 	created: bigint;

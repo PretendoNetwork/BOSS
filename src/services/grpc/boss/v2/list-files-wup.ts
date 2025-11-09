@@ -10,6 +10,7 @@ export async function listFilesWUP(request: ListFilesWUPRequest): Promise<ListFi
 	const bossAppID = request.bossAppId.trim();
 	const country = request.country?.trim();
 	const language = request.language?.trim();
+	const any = request.any;
 
 	if (!taskID) {
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing task ID');
@@ -35,7 +36,7 @@ export async function listFilesWUP(request: ListFilesWUPRequest): Promise<ListFi
 		throw new ServerError(Status.INVALID_ARGUMENT, `${language} is not a valid language`);
 	}
 
-	const files = await getWUPTaskFiles(false, bossAppID, taskID, country, language);
+	const files = await getWUPTaskFiles(false, bossAppID, taskID, country, language, any);
 
 	return {
 		files: files.map(file => ({

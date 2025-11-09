@@ -33,7 +33,7 @@ export async function updateTask(request: UpdateTaskRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, `Task ${taskID} not found for BOSS app ${bossAppID}`);
 	}
 
-	if (updateData.status !== 'open') {
+	if (updateData.status !== 'open' && updateData.status !== 'close') {
 		throw new ServerError(Status.INVALID_ARGUMENT, `Status ${updateData.status} is invalid`);
 	}
 

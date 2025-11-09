@@ -54,17 +54,20 @@ const createCmd = new Command('create')
 	.argument('<app_id>', 'BOSS app to store the task in')
 	.requiredOption('--id <id>', 'Id of the task')
 	.requiredOption('--title-id <titleId>', 'Title ID for the task')
+	.option('--status [status]', 'Initial status of the task')
+	.option('--interval [interval]', 'Interval of the task')
 	.option('--desc [desc]', 'Description of the task')
 	.action(commandHandler<[string]>(async (cmd): Promise<void> => {
 		const [appId] = cmd.args;
 		const ctx = getCliContext();
-		const opts = cmd.opts<{ id: string; titleId: string; desc?: string }>();
+		const opts = cmd.opts<{ id: string; titleId: string; status?: string; interval?: string; desc?: string }>();
 		const { task } = await ctx.grpc.registerTask({
 			bossAppId: appId,
 			id: opts.id,
 			titleId: BigInt(parseInt(opts.titleId, 16)),
-			description: opts.desc ?? '',
-			country: 'This value isnt used'
+			status: opts.status ?? 'open',
+			interval: Number(opts.interval ?? 0),
+			description: opts.desc ?? ''
 		});
 		if (!task) {
 			console.log(`Failed to create task!`);

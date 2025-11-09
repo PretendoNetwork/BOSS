@@ -53,7 +53,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		in_game_id: taskID,
 		boss_app_id: bossAppID,
 		creator_pid: context.user?.pid,
-		status: 'open', // TODO - Make this configurable
+		status: 'open',
 		title_id: titleID,
 		description: description,
 		created: Date.now(),

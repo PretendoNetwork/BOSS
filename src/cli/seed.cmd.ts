@@ -81,19 +81,10 @@ export async function processTasksheet(ctx: CliContext, taskFiles: string[], fil
 			bossAppId: bossAppId,
 			id: taskName,
 			titleId: BigInt(parseInt(xmlContents.TaskSheet.TitleId._text, 16)),
-			country: 'This value isnt used'
+			status: xmlContents.TaskSheet.ServiceStatus._text
 		});
 		console.log(`${filename}: Created task`);
 	}
-	await ctx.grpc.updateTask({
-		bossAppId: bossAppId,
-		id: taskName,
-		updateData: {
-			titleId: BigInt(parseInt(xmlContents.TaskSheet.TitleId._text, 16)),
-			status: xmlContents.TaskSheet.ServiceStatus._text
-		}
-	});
-	console.log(`${filename}: Updated title ID and status`);
 
 	let xmlFiles = xmlContents.TaskSheet.Files?.File ?? [];
 	if (!Array.isArray(xmlFiles)) {

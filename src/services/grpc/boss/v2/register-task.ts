@@ -16,6 +16,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 	const taskID = request.id.trim();
 	const bossAppID = request.bossAppId.trim();
 	const titleID = request.titleId.toString(16).toLowerCase().padStart(16, '0');
+	const status = request.status;
 	const description = request.description.trim();
 
 	if (!taskID) {
@@ -38,6 +39,10 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		throw new ServerError(Status.ALREADY_EXISTS, `Task ${taskID} already exists for BOSS app ${bossAppID}`);
 	}
 
+	if (status !== 'open' && status !== 'close') {
+		throw new ServerError(Status.INVALID_ARGUMENT, `Status ${status} is invalid`);
+	}
+
 	// * BOSS tasks have 2 IDs
 	// * - 1: The ID which is registered in-game
 	// * - 2: The ID which is registered on the server
@@ -53,7 +58,7 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		in_game_id: taskID,
 		boss_app_id: bossAppID,
 		creator_pid: context.user?.pid,
-		status: 'open', // TODO - Make this configurable
+		status,
 		title_id: titleID,
 		description: description,
 		created: Date.now(),

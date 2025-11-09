@@ -54,7 +54,7 @@ export function getTask(bossAppID: string, taskID: string): Promise<HydratedTask
 	});
 }
 
-export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string): Promise<HydratedFileCTRDocument[]> {
+export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, any: boolean = false): Promise<HydratedFileCTRDocument[]> {
 	verifyConnected();
 
 	const filter: mongoose.FilterQuery<IFileCTR> = {
@@ -74,7 +74,7 @@ export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_countries: country }
 			]
 		});
-	} else {
+	} else if (!any) {
 		filter.$and?.push({
 			supported_countries: { $eq: [] }
 		});
@@ -87,16 +87,20 @@ export function getCTRTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_languages: language }
 			]
 		});
-	} else {
+	} else if (!any) {
 		filter.$and?.push({
 			supported_languages: { $eq: [] }
 		});
 	}
 
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
+	}
+
 	return FileCTR.find(filter);
 }
 
-export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string): Promise<HydratedFileWUPDocument[]> {
+export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID: string, country?: string, language?: string, any: boolean = false): Promise<HydratedFileWUPDocument[]> {
 	verifyConnected();
 
 	const filter: mongoose.FilterQuery<IFileWUP> = {
@@ -116,7 +120,7 @@ export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_countries: country }
 			]
 		});
-	} else {
+	} else if (!any) {
 		filter.$and?.push({
 			supported_countries: { $eq: [] }
 		});
@@ -129,10 +133,14 @@ export function getWUPTaskFiles(allowDeleted: boolean, bossAppID: string, taskID
 				{ supported_languages: language }
 			]
 		});
-	} else {
+	} else if (!any) {
 		filter.$and?.push({
 			supported_languages: { $eq: [] }
 		});
+	}
+
+	if (filter.$and?.length === 0) {
+		delete filter.$and;
 	}
 
 	return FileWUP.find(filter);

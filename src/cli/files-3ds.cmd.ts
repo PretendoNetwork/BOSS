@@ -12,12 +12,19 @@ const listCmd = new Command('ls')
 	.description('List all task files in BOSS')
 	.argument('<app_id>', 'BOSS app to search in')
 	.argument('<task_id>', 'Task to search in')
+	.option('-c, --country [country]', 'Country to filter with')
+	.option('-l, --language [language]', 'Language to filter with')
+	.option('-a, --any', 'Shows any file regardless of country and language requirements')
 	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
 		const [appId, taskId] = cmd.args;
+		const opts = cmd.opts<{ country?: string; language?: string; any: boolean }>();
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
-			taskId: taskId
+			taskId: taskId,
+			country: opts.country,
+			language: opts.language,
+			any: opts.any
 		});
 		logOutputList(files, {
 			format: cmd.format,
@@ -40,7 +47,8 @@ const viewCmd = new Command('view')
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
-			taskId: taskId
+			taskId: taskId,
+			any: true
 		});
 		const file = files.find(v => v.dataId === dataId);
 		if (!file) {
