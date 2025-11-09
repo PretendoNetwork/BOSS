@@ -61,6 +61,15 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Cannot upload empty file');
 	}
 
+	if (!request.attributes) {
+		request.attributes = {
+			attribute1: '',
+			attribute2: '',
+			attribute3: '',
+			description: ''
+		};
+	}
+
 	const session = await databaseConnection().startSession();
 	await session.startTransaction();
 

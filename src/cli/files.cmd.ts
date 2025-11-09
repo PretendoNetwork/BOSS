@@ -4,6 +4,7 @@ import { Readable } from 'node:stream';
 import { request } from 'undici';
 import { Command } from 'commander';
 import { decryptWiiU } from '@pretendonetwork/boss-crypto';
+import { PlatformType } from '@pretendonetwork/grpc/boss/v2/platform_type';
 import { commandHandler, getCliContext } from './utils';
 import { logOutputList, logOutputObject } from './output';
 
@@ -14,7 +15,7 @@ const listCmd = new Command('ls')
 	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
 		const [appId, taskId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFiles({
+		const { files } = await ctx.grpc.listFilesWUP({
 			bossAppId: appId,
 			taskId: taskId
 		});
@@ -38,7 +39,7 @@ const viewCmd = new Command('view')
 	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
 		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFiles({
+		const { files } = await ctx.grpc.listFilesWUP({
 			bossAppId: appId,
 			taskId: taskId
 		});
@@ -76,7 +77,7 @@ const downloadCmd = new Command('download')
 	.action(commandHandler<[string, string, bigint]>(async (cmd): Promise<void> => {
 		const [appId, taskId, dataId] = cmd.args;
 		const ctx = getCliContext();
-		const { files } = await ctx.grpc.listFiles({
+		const { files } = await ctx.grpc.listFilesWUP({
 			bossAppId: appId,
 			taskId: taskId
 		});
@@ -130,7 +131,7 @@ const createCmd = new Command('create')
 		const opts = cmd.opts<{ name: string; country: string[]; notifyNew: string[]; notifyLed: boolean; lang: string[]; nameAsId?: boolean; type: string; file: string }>();
 		const fileBuf = await fs.readFile(opts.file);
 		const ctx = getCliContext();
-		const { file } = await ctx.grpc.uploadFile({
+		const { file } = await ctx.grpc.uploadFileWUP({
 			taskId: taskId,
 			bossAppId: appId,
 			name: opts.name,
@@ -160,7 +161,8 @@ const deleteCmd = new Command('delete')
 		const ctx = getCliContext();
 		await ctx.grpc.deleteFile({
 			bossAppId: appId,
-			dataId: dataId
+			dataId: dataId,
+			platformType: PlatformType.PLATFORM_TYPE_WUP
 		});
 		console.log(`Deleted task file with ID ${dataId}`);
 	}));

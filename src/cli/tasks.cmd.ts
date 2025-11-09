@@ -38,7 +38,7 @@ const viewCmd = new Command('view')
 			taskId: task.id,
 			inGameId: task.inGameId,
 			description: task.description,
-			titleId: task.titleId,
+			titleId: task.titleId.toString(16).toLowerCase().padStart(16, '0'),
 			bossAppId: task.bossAppId,
 			creatorPid: task.creatorPid,
 			status: task.status,
@@ -62,7 +62,7 @@ const createCmd = new Command('create')
 		const { task } = await ctx.grpc.registerTask({
 			bossAppId: appId,
 			id: opts.id,
-			titleId: opts.titleId,
+			titleId: BigInt(parseInt(opts.titleId, 16)),
 			description: opts.desc ?? '',
 			country: 'This value isnt used'
 		});

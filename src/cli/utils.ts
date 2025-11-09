@@ -1,7 +1,7 @@
-import { BOSSDefinition } from '@pretendonetwork/grpc/boss/boss_service';
+import { BossServiceDefinition } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import dotenv from 'dotenv';
-import type { BOSSClient } from '@pretendonetwork/grpc/boss/boss_service';
+import type { BossServiceClient } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import type { Command } from 'commander';
 import type { FormatOption } from './output';
 
@@ -12,7 +12,7 @@ export type NpdiUrl = {
 };
 
 export type CliContext = {
-	grpc: BOSSClient;
+	grpc: BossServiceClient;
 	getNpdiUrl: () => NpdiUrl;
 	getWiiUKeys: () => WiiUKeys;
 };
@@ -30,7 +30,7 @@ export function getCliContext(): CliContext {
 	}
 
 	const channel = createChannel(grpcHost);
-	const client: BOSSClient = createClient(BOSSDefinition, channel, {
+	const client: BossServiceClient = createClient(BossServiceDefinition, channel, {
 		'*': {
 			metadata: new Metadata({
 				'X-API-Key': grpcKey

@@ -78,6 +78,15 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Cannot upload empty file');
 	}
 
+	if (!request.attributes) {
+		request.attributes = {
+			attribute1: '',
+			attribute2: '',
+			attribute3: '',
+			description: ''
+		};
+	}
+
 	let encryptedData: Buffer;
 
 	try {
@@ -129,6 +138,7 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		file_key: key,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
+		attributes: request.attributes,
 		creator_pid: context.user?.pid,
 		name: name,
 		type: type,
@@ -141,17 +151,6 @@ export async function uploadFileWUP(request: UploadFileWUPRequest, context: Call
 		created: Date.now(),
 		updated: Date.now()
 	});
-
-	if (request.attributes) {
-		file.attributes = {
-			attribute1: request.attributes.attribute1,
-			attribute2: request.attributes.attribute2,
-			attribute3: request.attributes.attribute3,
-			description: request.attributes.description
-		};
-
-		await file.save();
-	}
 
 	if (nameEqualsDataID) {
 		file.name = file.data_id.toString(16).padStart(8, '0');
