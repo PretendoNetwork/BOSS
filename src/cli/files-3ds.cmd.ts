@@ -140,11 +140,12 @@ const createCmd = new Command('create')
 	.option('--attribute3 [attribute3]', 'Attribute 3 for this task file')
 	.option('--desc [desc]', 'Description for this task file')
 	.option('-m, --mark-arrived-privileged', 'Only notify of new content to privileged titles')
+	.option('-n, --no-payload', 'Make this task file have no payload contents')
 	.action(commandHandler<[string, string]>(async (cmd): Promise<void> => {
 		const [appId, taskId] = cmd.args;
 		// TODO - Handle multiple payload contents
-		const opts = cmd.opts<{ name: string; titleId: string; contentDatatype: string; nsDataId: string; version: string; file: string; country: string[]; lang: string[]; attribute1?: string; attribute2?: string; attribute3?: string; desc?: string; markArrivedPrivileged: boolean }>();
-		const fileBuf = await fs.readFile(opts.file);
+		const opts = cmd.opts<{ name: string; titleId: string; contentDatatype: string; nsDataId: string; version: string; file: string; country: string[]; lang: string[]; attribute1?: string; attribute2?: string; attribute3?: string; desc?: string; markArrivedPrivileged: boolean; payload: boolean }>();
+		const fileBuf = opts.payload ? await fs.readFile(opts.file) : Buffer.alloc(0);
 		const ctx = getCliContext();
 		const { file } = await ctx.grpc.uploadFileCTR({
 			taskId: taskId,
@@ -158,13 +159,15 @@ const createCmd = new Command('create')
 				description: opts.desc
 			},
 			name: opts.name,
-			payloadContents: [{
-				titleId: BigInt(parseInt(opts.titleId, 16)),
-				contentDatatype: Number(opts.contentDatatype),
-				nsDataId: Number(opts.nsDataId),
-				version: Number(opts.version),
-				content: fileBuf
-			}],
+			payloadContents: opts.payload
+				? [{
+						titleId: BigInt(parseInt(opts.titleId, 16)),
+						contentDatatype: Number(opts.contentDatatype),
+						nsDataId: Number(opts.nsDataId),
+						version: Number(opts.version),
+						content: fileBuf
+					}]
+				: [],
 			flags: {
 				markArrivedPrivileged: opts.markArrivedPrivileged
 			}

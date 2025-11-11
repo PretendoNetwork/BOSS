@@ -57,10 +57,6 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 		}
 	}
 
-	if (payloads.length === 0) {
-		throw new ServerError(Status.INVALID_ARGUMENT, 'Cannot upload empty file');
-	}
-
 	if (!request.attributes) {
 		request.attributes = {
 			attribute1: '',
