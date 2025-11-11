@@ -117,7 +117,7 @@ const downloadCmd = new Command('download')
 			const keys = ctx.get3DSKeys();
 			const decrypted = decrypt3DS(buffer, keys.aesKey);
 			// TODO - Handle multiple payloads
-			buffer = decrypted.payload_contents[0].content;
+			buffer = decrypted.payload_contents[0]?.content ?? Buffer.alloc(0);
 		}
 
 		await pipeline(Readable.from(buffer), process.stdout);
