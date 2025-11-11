@@ -84,7 +84,8 @@ const downloadCmd = new Command('download')
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFilesCTR({
 			bossAppId: appId,
-			taskId: taskId
+			taskId: taskId,
+			any: true
 		});
 		const file = files.find(v => v.dataId === dataId);
 		if (!file) {
@@ -94,7 +95,7 @@ const downloadCmd = new Command('download')
 
 		const npdl = ctx.getNpdlUrl();
 		const country = file.supportedCountries.length > 0 ? '/' + file.supportedCountries[0] : '';
-		const language = file.supportedLanguages.length > 0 ? '/' + file.supportedCountries[0] : '';
+		const language = file.supportedLanguages.length > 0 ? '/' + file.supportedLanguages[0] : '';
 		const { body, statusCode } = await request(`${npdl.url}/p01/nsa/${file.bossAppId}/${file.taskId}${country}${language}/${file.name}`, {
 			headers: {
 				Host: npdl.host

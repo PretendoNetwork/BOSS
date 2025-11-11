@@ -87,7 +87,8 @@ const downloadCmd = new Command('download')
 		const ctx = getCliContext();
 		const { files } = await ctx.grpc.listFilesWUP({
 			bossAppId: appId,
-			taskId: taskId
+			taskId: taskId,
+			any: true
 		});
 		const file = files.find(v => v.dataId === dataId);
 		if (!file) {
