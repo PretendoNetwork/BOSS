@@ -11,7 +11,10 @@ import { config } from '@/config-manager';
 import type { Server } from 'nice-grpc';
 
 export async function startGRPCServer(): Promise<void> {
-	const server: Server = createServer();
+	const server: Server = createServer({
+		'grpc.max_receive_message_length': config.grpc.max_receive_message_length * 1024 * 1024,
+		'grpc.max_send_message_length': config.grpc.max_send_message_length * 1024 * 1024
+	});
 
 	server.with(apiKeyMiddlewareV1).with(authenticationMiddlewareV1).add(BossServiceDefinitionV1, bossServiceImplementationV1);
 	server.with(apiKeyMiddlewareV2).with(authenticationMiddlewareV2).add(BossServiceDefinitionV2, bossServiceImplementationV2);

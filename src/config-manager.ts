@@ -45,6 +45,8 @@ export const config = {
 		}
 	},
 	grpc: {
+		max_receive_message_length: Number(process.env.PN_BOSS_CONFIG_GRPC_MAX_RECEIVE_MESSAGE_LENGTH_MB?.trim() || '4'),
+		max_send_message_length: Number(process.env.PN_BOSS_CONFIG_GRPC_MAX_SEND_MESSAGE_LENGTH_MB?.trim() || '4'),
 		boss: {
 			address: process.env.PN_BOSS_CONFIG_GRPC_BOSS_SERVER_ADDRESS?.trim() || '',
 			port: Number(process.env.PN_BOSS_CONFIG_GRPC_BOSS_SERVER_PORT?.trim() || ''),
