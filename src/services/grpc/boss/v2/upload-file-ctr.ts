@@ -82,7 +82,7 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 			await file.save({ session });
 		}
 
-		file = await FileCTR.create({
+		[file] = await FileCTR.create([{
 			creator_pid: context.user?.pid,
 			// * hash: String,
 			// * file_key: String,
@@ -105,7 +105,7 @@ export async function uploadFileCTR(request: UploadFileCTRRequest, context: Call
 			},
 			created: Date.now(),
 			updated: Date.now()
-		});
+		}], { session });
 
 		const cryptoOptions = payloads.map(payload => ({
 			program_id: payload.titleId,
