@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import express from 'express';
-import { getTaskFilesWithAttributes } from '@/database';
+import { getCTRTaskFilesWithAttributes } from '@/database';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
 
@@ -40,7 +40,7 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 	const attribute2 = request.query.a2;
 	const attribute3 = request.query.a3;
 
-	const files = await getTaskFilesWithAttributes(false, appID, taskID, country, language, attribute1, attribute2, attribute3);
+	const files = await getCTRTaskFilesWithAttributes(false, appID, taskID, country, language, attribute1, attribute2, attribute3);
 
 	// * https://gist.github.com/DaniElectra/ada7ecc930a84432f2045f6fcabac84f#nintendo-boss-file-list-server-npfl
 	// *
@@ -55,11 +55,11 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 	// * File lines have the following fields:
 	// *
 	// *	- File name
-	// *	- Unknown (password?)
+	// *	- Description
 	// *	- Attribute 1
 	// *	- Attribute 2
 	// *	- Attribute 3
-	// *	- File size (0 is allowed)
+	// *	- Content size (size of the first payload content)
 	// *	- Updated time (seconds)
 	// *
 	// * All fields of a file line are separated by a tab (\t) and are present even if no value.
@@ -83,11 +83,11 @@ npfl.get('/p01/filelist/:appID/:taskID', async (request: express.Request<{
 	for (const file of files) {
 		const params = [
 			file.name,
-			file.password, // * Unsure if this is really what this is for. Team Kirby Clash Deluxe uses this for passwords though
-			file.attribute1,
-			file.attribute2,
-			file.attribute3,
-			file.size,
+			file.attributes.description,
+			file.attributes.attribute1,
+			file.attributes.attribute2,
+			file.attributes.attribute3,
+			file.payload_contents[0]?.size ?? 0,
 			file.updated / 1000n // * Expects time as seconds, not milliseconds
 		];
 		const line = `${params.join('\t')}\r\n`;

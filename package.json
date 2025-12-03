@@ -14,9 +14,9 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.723.0",
-		"@pretendonetwork/boss-crypto": "^1.0.0",
-		"@pretendonetwork/grpc": "^1.0.6",
-		"@typegoose/auto-increment": "^4.13.0",
+		"@pretendonetwork/boss-crypto": "^1.2.2",
+		"@pretendonetwork/grpc": "^2.3.5",
+		"@typegoose/auto-increment": "^4.13.1",
 		"commander": "^14.0.0",
 		"cron": "^4.3.3",
 		"dotenv": "^16.4.7",

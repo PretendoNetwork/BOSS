@@ -2,7 +2,7 @@ import express from 'express';
 import { restrictHostnames } from '@/middleware/host-limit';
 import { config } from '@/config-manager';
 import { getCDNFileAsStream, streamFileToResponse } from '@/cdn';
-import { getTaskFileByDataID } from '@/database';
+import { getWUPTaskFileByDataID } from '@/database';
 import { handleEtag, sendEtagCacheResponse } from '@/util';
 
 const npdi = express.Router();
@@ -10,7 +10,7 @@ const npdi = express.Router();
 npdi.get('/p01/data/1/:bossAppId/:dataId/:fileHash', async (request, response) => {
 	const { dataId, fileHash, bossAppId } = request.params;
 
-	const file = await getTaskFileByDataID(BigInt(dataId));
+	const file = await getWUPTaskFileByDataID(BigInt(dataId));
 	if (!file) {
 		return response.sendStatus(404);
 	}

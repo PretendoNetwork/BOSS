@@ -20,6 +20,11 @@ const listCmd = new Command('ls')
 				if (key === 'name') {
 					return prettyTrunc(value, 20);
 				}
+
+				if (key === 'titleId') {
+					return value.toString(16).toLowerCase().padStart(16, '0');
+				}
+
 				return value;
 			}
 		});
@@ -41,7 +46,7 @@ const viewCmd = new Command('view')
 		const obj = {
 			appId: app.bossAppId,
 			name: app.name,
-			titleId: app.titleId,
+			titleId: app.titleId.toString(16).toLowerCase().padStart(16, '0'),
 			titleRegion: app.titleRegion,
 			knownTasks: app.tasks
 		};
