@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import { Command } from 'commander';
 import { xml2js } from 'xml-js';
 import { decryptWiiU } from '@pretendonetwork/boss-crypto';
+import { PlatformType } from '@pretendonetwork/grpc/boss/v2/platform_type';
 import { getCliContext } from './utils';
 import { seedFolder } from './root';
 import type { CliContext } from './utils';
@@ -31,7 +32,7 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 		fileContents = decryptedContents.content;
 	}
 
-	const allExistingTaskFiles = await ops.ctx.grpc.listFiles({
+	const allExistingTaskFiles = await ops.ctx.grpc.listFilesWUP({
 		bossAppId: ops.bossAppId,
 		taskId: ops.taskId
 	});
@@ -40,11 +41,12 @@ export async function uploadFileIfChanged(ops: UploadFileOptions): Promise<void>
 		console.warn(`${ops.dataId}: File already uploaded, reuploading`);
 		await ops.ctx.grpc.deleteFile({
 			bossAppId: ops.bossAppId,
-			dataId: BigInt(ops.dataId)
+			dataId: BigInt(ops.dataId),
+			platformType: PlatformType.PLATFORM_TYPE_WUP
 		});
 	}
 
-	await ops.ctx.grpc.uploadFile({
+	await ops.ctx.grpc.uploadFileWUP({
 		bossAppId: ops.bossAppId,
 		taskId: ops.taskId,
 		name: ops.fileXml.Filename._text,
@@ -78,20 +80,11 @@ export async function processTasksheet(ctx: CliContext, taskFiles: string[], fil
 		await ctx.grpc.registerTask({
 			bossAppId: bossAppId,
 			id: taskName,
-			titleId: xmlContents.TaskSheet.TitleId._text,
-			country: 'This value isnt used'
+			titleId: BigInt(parseInt(xmlContents.TaskSheet.TitleId._text, 16)),
+			status: xmlContents.TaskSheet.ServiceStatus._text
 		});
 		console.log(`${filename}: Created task`);
 	}
-	await ctx.grpc.updateTask({
-		bossAppId: bossAppId,
-		id: taskName,
-		updateData: {
-			titleId: xmlContents.TaskSheet.TitleId._text,
-			status: xmlContents.TaskSheet.ServiceStatus._text
-		}
-	});
-	console.log(`${filename}: Updated title ID and status`);
 
 	let xmlFiles = xmlContents.TaskSheet.Files?.File ?? [];
 	if (!Array.isArray(xmlFiles)) {

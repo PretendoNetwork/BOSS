@@ -1,10 +1,10 @@
 import { Status, ServerError } from 'nice-grpc';
 import { getTask } from '@/database';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v1/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
 import type { DeleteTaskRequest } from '@pretendonetwork/grpc/boss/delete_task';
-import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
+import type { Empty } from '@pretendonetwork/grpc/google/protobuf/empty';
 
 export async function deleteTask(request: DeleteTaskRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
 	if (!hasPermission(context, 'deleteBossTasks')) {

@@ -1,13 +1,13 @@
 import { Status, ServerError } from 'nice-grpc';
-import { getTaskFileByDataID } from '@/database';
+import { getWUPTaskFileByDataID } from '@/database';
 import { isValidFileNotifyCondition, isValidFileType } from '@/util';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
-import type { UpdateFileMetadataRequest } from '@pretendonetwork/grpc/boss/update_file_metadata';
-import type { Empty } from '@pretendonetwork/grpc/boss/google/protobuf/empty';
+import type { UpdateFileMetadataWUPRequest } from '@pretendonetwork/grpc/boss/v2/update_file_metadata_wup';
+import type { Empty } from '@pretendonetwork/grpc/google/protobuf/empty';
 
-export async function updateFileMetadata(request: UpdateFileMetadataRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
+export async function updateFileMetadataWUP(request: UpdateFileMetadataWUPRequest, context: CallContext & AuthenticationCallContextExt): Promise<Empty> {
 	if (!hasPermission(context, 'updateBossFiles')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to update file metadata');
 	}
@@ -23,7 +23,7 @@ export async function updateFileMetadata(request: UpdateFileMetadataRequest, con
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Missing file update data');
 	}
 
-	const file = await getTaskFileByDataID(dataID);
+	const file = await getWUPTaskFileByDataID(dataID);
 
 	if (!file || file.deleted) {
 		throw new ServerError(Status.INVALID_ARGUMENT, `File ${dataID} not found`);
@@ -43,14 +43,13 @@ export async function updateFileMetadata(request: UpdateFileMetadataRequest, con
 	file.boss_app_id = updateData.bossAppId;
 	file.supported_countries = updateData.supportedCountries;
 	file.supported_languages = updateData.supportedLanguages;
-	file.password = updateData.password;
-	file.attribute1 = updateData.attribute1;
-	file.attribute2 = updateData.attribute2;
-	file.attribute3 = updateData.attribute3;
+	file.attributes = updateData.attributes ? updateData.attributes : file.attributes;
 	file.name = updateData.name;
 	file.type = updateData.type;
 	file.notify_on_new = updateData.notifyOnNew;
 	file.notify_led = updateData.notifyLed;
+	file.condition_played = updateData.conditionPlayed;
+	file.auto_delete = updateData.autoDelete;
 	file.updated = BigInt(Date.now());
 
 	await file.save();
