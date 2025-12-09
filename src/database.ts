@@ -186,15 +186,15 @@ export function getCTRTaskFilesWithAttributes(allowDeleted: boolean, bossAppID: 
 	}
 
 	if (attribute1) {
-		filter.attributes.attribute1 = attribute1;
+		filter['attributes.attribute1'] = attribute1;
 	}
 
 	if (attribute2) {
-		filter.attributes.attribute2 = attribute2;
+		filter['attributes.attribute2'] = attribute2;
 	}
 
 	if (attribute3) {
-		filter.attributes.attribute3 = attribute3;
+		filter['attributes.attribute3'] = attribute3;
 	}
 
 	if (filter.$and?.length === 0) {
