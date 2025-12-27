@@ -1,20 +1,27 @@
-import { BOSSDefinition } from '@pretendonetwork/grpc/boss/boss_service';
+import { BossServiceDefinition } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import { createChannel, createClient, Metadata } from 'nice-grpc';
 import dotenv from 'dotenv';
-import type { BOSSClient } from '@pretendonetwork/grpc/boss/boss_service';
+import type { BossServiceClient } from '@pretendonetwork/grpc/boss/v2/boss_service';
 import type { Command } from 'commander';
 import type { FormatOption } from './output';
 
 export type WiiUKeys = { aesKey: string; hmacKey: string };
+export type CtrKeys = { aesKey: string };
 export type NpdiUrl = {
+	host: string;
+	url: string;
+};
+export type NpdlUrl = {
 	host: string;
 	url: string;
 };
 
 export type CliContext = {
-	grpc: BOSSClient;
+	grpc: BossServiceClient;
 	getNpdiUrl: () => NpdiUrl;
+	getNpdlUrl: () => NpdlUrl;
 	getWiiUKeys: () => WiiUKeys;
+	get3DSKeys: () => CtrKeys;
 };
 
 export function getCliContext(): CliContext {
@@ -30,7 +37,7 @@ export function getCliContext(): CliContext {
 	}
 
 	const channel = createChannel(grpcHost);
-	const client: BOSSClient = createClient(BOSSDefinition, channel, {
+	const client: BossServiceClient = createClient(BossServiceDefinition, channel, {
 		'*': {
 			metadata: new Metadata({
 				'X-API-Key': grpcKey
@@ -49,6 +56,15 @@ export function getCliContext(): CliContext {
 				host: npdiHost
 			};
 		},
+		getNpdlUrl(): NpdiUrl {
+			const npdlUrl = process.env.PN_BOSS_CLI_NPDL_URL ?? 'https://npdl.cdn.pretendo.cc';
+			const npdlHost = process.env.PN_BOSS_CLI_NPDL_HOST ?? new URL(npdlUrl).host;
+
+			return {
+				url: npdlUrl,
+				host: npdlHost
+			};
+		},
 		getWiiUKeys(): WiiUKeys {
 			const aesKey = process.env.PN_BOSS_CLI_WIIU_AES_KEY ?? '';
 			const hmacKey = process.env.PN_BOSS_CLI_WIIU_HMAC_KEY ?? '';
@@ -62,6 +78,16 @@ export function getCliContext(): CliContext {
 			return {
 				aesKey,
 				hmacKey
+			};
+		},
+		get3DSKeys(): CtrKeys {
+			const aesKey = process.env.PN_BOSS_CLI_3DS_AES_KEY ?? '';
+
+			if (!aesKey) {
+				throw new Error('Missing env variable PN_BOSS_CLI_3DS_AES_KEY - needed for decryption');
+			}
+			return {
+				aesKey
 			};
 		}
 	};

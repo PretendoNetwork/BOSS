@@ -1,0 +1,36 @@
+import type { Model, HydratedDocument } from 'mongoose';
+
+export interface IFileWUP {
+	deleted: boolean;
+	file_key: string;
+	data_id: bigint;
+	task_id: string;
+	boss_app_id: string;
+	supported_countries: string[];
+	supported_languages: string[];
+	attributes: {
+		attribute1: string;
+		attribute2: string;
+		attribute3: string;
+		description: string;
+	};
+	creator_pid: number;
+	name: string;
+	type: string;
+	hash: string;
+	size: bigint;
+	notify_on_new: string[];
+	notify_led: boolean;
+	condition_played: bigint;
+	auto_delete: boolean;
+	created: bigint;
+	updated: bigint;
+}
+
+export interface IFileWUPMethods {}
+
+interface IFileWUPQueryHelpers {}
+
+export type FileWUPModel = Model<IFileWUP, IFileWUPQueryHelpers, IFileWUPMethods>;
+
+export type HydratedFileWUPDocument = HydratedDocument<IFileWUP, IFileWUPMethods>;

@@ -2,37 +2,62 @@ import express from 'express';
 import xmlbuilder from 'xmlbuilder';
 import { config } from '@/config-manager';
 import { restrictHostnames } from '@/middleware/host-limit';
-import { getTask, getTaskFile, getTaskFiles } from '@/database';
-import type { HydratedFileDocument } from '@/types/mongoose/file';
+import { getTask, getWUPTaskFile, getWUPTaskFiles } from '@/database';
+import type { HydratedFileWUPDocument } from '@/types/mongoose/file-wup';
 import type { HydratedTaskDocument } from '@/types/mongoose/task';
 
 const npts = express.Router();
 
 const xmlHeadSettings = { encoding: 'UTF-8', version: '1.0' };
 
-function buildFile(task: HydratedTaskDocument, file: HydratedFileDocument): any {
-	return {
-		Filename: file.name,
-		DataId: file.data_id,
-		Type: file.type,
-		Url: `https://${config.domains.npdi}/p01/data/1/${task.boss_app_id}/${file.data_id}/${file.hash}`,
-		Size: file.size,
-		Notify: {
-			New: file.notify_on_new.join(','),
-			LED: file.notify_led
-		}
-	};
+function buildFile(task: HydratedTaskDocument, file: HydratedFileWUPDocument, attributesMode: boolean): any {
+	if (attributesMode) {
+		return {
+			Filename: file.name,
+			Type: file.type,
+			Size: file.size,
+			Attributes: {
+				Attribute1: file.attributes.attribute1,
+				Attribute2: file.attributes.attribute2,
+				Attribute3: file.attributes.attribute3,
+				Description: file.attributes.description
+			}
+		};
+	} else {
+		return {
+			Filename: file.name,
+			DataId: file.data_id,
+			Type: file.type,
+			Url: `https://${config.domains.npdi}/p01/data/1/${task.boss_app_id}/${file.data_id}/${file.hash}`,
+			Size: file.size,
+			Notify: {
+				New: file.notify_on_new.join(','),
+				LED: file.notify_led
+			}
+		};
+	}
 }
 
-npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request: express.Request<{
+	id: string;
+	bossAppId: string;
+	taskId: string;
+}, any, any, {
+	c?: string;
+	l?: string;
+	mode?: string;
+}>, response) => {
 	const { bossAppId, taskId } = request.params;
+	const country = request.query.c;
+	const language = request.query.l;
+	const mode = request.query.mode;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const files = await getTaskFiles(false, bossAppId, taskId);
+	const files = await getWUPTaskFiles(false, bossAppId, taskId, country, language);
 
 	const xmlContent = {
 		TaskSheet: {
@@ -40,7 +65,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: files.map(f => buildFile(task, f))
+				File: files.map(f => buildFile(task, f, mode === 'attr'))
 			}
 		}
 	};
@@ -49,15 +74,27 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId', async (request, response) => {
 	response.send(xmlbuilder.create(xmlContent, xmlHeadSettings).end({ pretty: true }));
 });
 
-npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, response) => {
+npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request: express.Request<{
+	id: string;
+	bossAppId: string;
+	taskId: string;
+	fileName: string;
+}, any, any, {
+	c?: string;
+	l?: string;
+	mode?: string;
+}>, response) => {
 	const { bossAppId, taskId, fileName } = request.params;
+	const country = request.query.c;
+	const language = request.query.l;
+	const mode = request.query.mode;
 
 	const task = await getTask(bossAppId, taskId);
 	if (!task) {
 		return response.sendStatus(404);
 	}
 
-	const file = await getTaskFile(bossAppId, taskId, fileName);
+	const file = await getWUPTaskFile(bossAppId, taskId, fileName, country, language);
 	if (!file) {
 		return response.sendStatus(404);
 	}
@@ -68,7 +105,7 @@ npts.get('/p01/tasksheet/:id/:bossAppId/:taskId/:fileName', async (request, resp
 			TaskId: task.id,
 			ServiceStatus: task.status,
 			Files: {
-				File: buildFile(task, file)
+				File: buildFile(task, file, mode === 'attr')
 			}
 		}
 	};

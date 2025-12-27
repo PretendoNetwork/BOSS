@@ -1,10 +1,10 @@
 import { ServerError, Status } from 'nice-grpc';
 import { getTask } from '@/database';
 import { Task } from '@/models/task';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
-import type { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/register_task';
+import type { RegisterTaskRequest, RegisterTaskResponse } from '@pretendonetwork/grpc/boss/v2/register_task';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
@@ -15,7 +15,9 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 
 	const taskID = request.id.trim();
 	const bossAppID = request.bossAppId.trim();
-	const titleID = request.titleId.trim().toLocaleLowerCase();
+	const titleID = request.titleId.toString(16).toLowerCase().padStart(16, '0');
+	const status = request.status;
+	const interval = request.interval;
 	const description = request.description.trim();
 
 	if (!taskID) {
@@ -38,6 +40,10 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		throw new ServerError(Status.ALREADY_EXISTS, `Task ${taskID} already exists for BOSS app ${bossAppID}`);
 	}
 
+	if (status !== 'open' && status !== 'close') {
+		throw new ServerError(Status.INVALID_ARGUMENT, `Status ${status} is invalid`);
+	}
+
 	// * BOSS tasks have 2 IDs
 	// * - 1: The ID which is registered in-game
 	// * - 2: The ID which is registered on the server
@@ -53,7 +59,8 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 		in_game_id: taskID,
 		boss_app_id: bossAppID,
 		creator_pid: context.user?.pid,
-		status: 'open', // TODO - Make this configurable
+		status,
+		interval,
 		title_id: titleID,
 		description: description,
 		created: Date.now(),
@@ -68,7 +75,8 @@ export async function registerTask(request: RegisterTaskRequest, context: CallCo
 			bossAppId: task.boss_app_id,
 			creatorPid: task.creator_pid,
 			status: task.status,
-			titleId: task.title_id,
+			interval: task.interval,
+			titleId: BigInt(parseInt(task.title_id, 16)),
 			description: task.description,
 			createdTimestamp: task.created,
 			updatedTimestamp: task.updated

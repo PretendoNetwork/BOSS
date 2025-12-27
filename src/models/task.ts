@@ -15,6 +15,7 @@ const TaskSchema = new mongoose.Schema<ITask, TaskModel, ITaskMethods>({
 		required: true,
 		enum: ['open', 'close']
 	},
+	interval: Number,
 	title_id: String,
 	description: String,
 	created: BigInt,

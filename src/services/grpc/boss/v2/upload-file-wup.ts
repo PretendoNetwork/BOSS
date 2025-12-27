@@ -1,18 +1,18 @@
 import { Status, ServerError } from 'nice-grpc';
 import { encryptWiiU } from '@pretendonetwork/boss-crypto';
 import { isValidCountryCode, isValidFileNotifyCondition, isValidFileType, isValidLanguage, md5 } from '@/util';
-import { getTask, getTaskFile } from '@/database';
-import { File } from '@/models/file';
+import { getTask, getWUPTaskFile } from '@/database';
+import { FileWUP } from '@/models/file-wup';
 import { config } from '@/config-manager';
 import { uploadCDNFile } from '@/cdn';
-import { hasPermission } from '@/services/grpc/boss/middleware/authentication-middleware';
-import type { AuthenticationCallContextExt } from '@/services/grpc/boss/middleware/authentication-middleware';
+import { hasPermission } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
+import type { AuthenticationCallContextExt } from '@/services/grpc/boss/v2/middleware/authentication-middleware';
 import type { CallContext } from 'nice-grpc';
-import type { UploadFileRequest, UploadFileResponse } from '@pretendonetwork/grpc/boss/upload_file';
+import type { UploadFileWUPRequest, UploadFileWUPResponse } from '@pretendonetwork/grpc/boss/v2/upload_file_wup';
 
 const BOSS_APP_ID_FILTER_REGEX = /^[A-Za-z0-9]*$/;
 
-export async function uploadFile(request: UploadFileRequest, context: CallContext & AuthenticationCallContextExt): Promise<UploadFileResponse> {
+export async function uploadFileWUP(request: UploadFileWUPRequest, context: CallContext & AuthenticationCallContextExt): Promise<UploadFileWUPResponse> {
 	if (!hasPermission(context, 'uploadBossFiles')) {
 		throw new ServerError(Status.PERMISSION_DENIED, 'PNID not authorized to upload new files');
 	}
@@ -78,9 +78,19 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.INVALID_ARGUMENT, 'Cannot upload empty file');
 	}
 
+	if (!request.attributes) {
+		request.attributes = {
+			attribute1: '',
+			attribute2: '',
+			attribute3: '',
+			description: ''
+		};
+	}
+
 	let encryptedData: Buffer;
 
 	try {
+		// TODO - Check the first few bytes of the uploaded content to see if it's encrypted already, to support pre-encrypted content?
 		encryptedData = encryptWiiU(data, config.crypto.wup.aes_key, config.crypto.wup.hmac_key);
 	} catch (error: unknown) {
 		let message = 'Unknown file encryption error';
@@ -113,7 +123,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		throw new ServerError(Status.ABORTED, message);
 	}
 
-	let file = await getTaskFile(bossAppID, taskID, name);
+	let file = await getWUPTaskFile(bossAppID, taskID, name);
 
 	if (file) {
 		file.deleted = true;
@@ -122,12 +132,13 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		await file.save();
 	}
 
-	file = await File.create({
+	file = await FileWUP.create({
 		task_id: taskID.slice(0, 7),
 		boss_app_id: bossAppID,
 		file_key: key,
 		supported_countries: supportedCountries,
 		supported_languages: supportedLanguages,
+		attributes: request.attributes,
 		creator_pid: context.user?.pid,
 		name: name,
 		type: type,
@@ -135,6 +146,8 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 		size: BigInt(encryptedData.length),
 		notify_on_new: notifyOnNew,
 		notify_led: notifyLed,
+		condition_played: request.conditionPlayed,
+		auto_delete: request.autoDelete,
 		created: Date.now(),
 		updated: Date.now()
 	});
@@ -152,10 +165,7 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 			bossAppId: file.boss_app_id,
 			supportedCountries: file.supported_countries,
 			supportedLanguages: file.supported_languages,
-			password: file.password,
-			attribute1: file.attribute1,
-			attribute2: file.attribute2,
-			attribute3: file.attribute3,
+			attributes: file.attributes,
 			creatorPid: file.creator_pid,
 			name: file.name,
 			type: file.type,
@@ -163,6 +173,8 @@ export async function uploadFile(request: UploadFileRequest, context: CallContex
 			size: file.size,
 			notifyOnNew: file.notify_on_new,
 			notifyLed: file.notify_led,
+			conditionPlayed: request.conditionPlayed,
+			autoDelete: request.autoDelete,
 			createdTimestamp: file.created,
 			updatedTimestamp: file.updated
 		}
