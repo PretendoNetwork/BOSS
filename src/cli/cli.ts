@@ -14,7 +14,10 @@ const program = baseProgram
 	.addCommand(fileCmd);
 
 program.parseAsync(process.argv)
-	.catch(console.error)
+	.catch((err) => {
+		console.error(err);
+		process.exit(1);
+	})
 	.then(() => {
 		process.exit(0); // forcibly close as GRPC channels keep process going
 	});
